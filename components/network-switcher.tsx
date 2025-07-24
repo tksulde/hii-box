@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { useAccount, useSwitchChain } from "wagmi";
 import { Button } from "@/components/ui/button";

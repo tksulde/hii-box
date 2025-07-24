@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import NextAuth from "next-auth";
 import credentialsProvider from "next-auth/providers/credentials";
 import {
@@ -49,15 +50,6 @@ const providers = [
         const address = getAddressFromMessage(message);
         const chainId = getChainIdFromMessage(message);
 
-        // for the moment, the verifySignature is not working with social logins and emails  with non deployed smart accounts
-        /*  const isValid = await verifySignature({
-          address,
-          message,
-          signature,
-          chainId,
-          projectId,
-        }); */
-        // we are going to use https://viem.sh/docs/actions/public/verifyMessage.html
         const publicClient = createPublicClient({
           transport: http(
             `https://rpc.walletconnect.org/v1/?chainId=${chainId}&projectId=${projectId}`
@@ -68,7 +60,6 @@ const providers = [
           address: address as `0x${string}`,
           signature: signature as `0x${string}`,
         });
-        // end o view verifyMessage
 
         if (isValid) {
           return {
