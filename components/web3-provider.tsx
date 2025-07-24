@@ -1,9 +1,9 @@
 "use client";
 
-import { wagmiAdapter, projectId, networks } from "@/lib/config";
+import { wagmiAdapter, projectId, networks, siweConfig } from "@/lib/config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppKit } from "@reown/appkit/react";
-import React, { type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
 
 // Set up queryClient
@@ -23,13 +23,14 @@ export const modal = createAppKit({
   projectId,
   networks,
   metadata,
-  themeMode: "light",
+  themeMode: "dark",
   features: {
     analytics: true, // Optional - defaults to your Cloud configuration
   },
   themeVariables: {
     "--w3m-accent": "#000000",
   },
+  siweConfig: siweConfig,
 });
 
 function ContextProvider({
