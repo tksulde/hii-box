@@ -50,6 +50,8 @@ const providers = [
         const address = getAddressFromMessage(message);
         const chainId = getChainIdFromMessage(message);
 
+        console.log("address ->", address, "signature ->", signature);
+
         const publicClient = createPublicClient({
           transport: http(
             `https://rpc.walletconnect.org/v1/?chainId=${chainId}&projectId=${projectId}`
@@ -62,6 +64,8 @@ const providers = [
         });
 
         if (isValid) {
+          console.log("address ->", address);
+          console.log("signature ->", signature);
           return {
             id: `${chainId}:${address}`,
           };
