@@ -44,26 +44,14 @@ const normalizeAddress = (address: string): string => {
 };
 
 export const siweConfig = createSIWEConfig({
-  getMessageParams: async () => {
-    const domain = window.location.host;
-    const uri = window.location.origin;
-
-    return {
-      domain,
-      uri,
-      chains: networks.map((chain: AppKitNetwork) =>
-        parseInt(chain.id.toString())
-      ),
-    };
-  },
-  createMessage: ({ address, ...args }: SIWECreateMessageArgs) => {
-    return formatMessage(
-      {
-        ...args,
-      },
-      normalizeAddress(address)
-    );
-  },
+  getMessageParams: async () => ({
+    domain: typeof window !== "undefined" ? window.location.host : "",
+    uri: typeof window !== "undefined" ? window.location.origin : "",
+    chains: [apeChain.id],
+    statement: "Please sign with your account",
+  }),
+  createMessage: ({ address, ...args }: SIWECreateMessageArgs) =>
+    formatMessage(args, address),
   getNonce: async () => {
     const nonce = await getCsrfToken();
     if (!nonce) {
