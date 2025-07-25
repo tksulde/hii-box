@@ -20,7 +20,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
-
 interface ConnectButtonProps {
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg";

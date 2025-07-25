@@ -1,7 +1,7 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Image from "next/image";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -30,7 +30,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const headersData = await headers();
-  const cookies = headersData.get("cookie");
+  const cookies2 = headersData.get("cookie");
+
+  const cookieStore = cookies();
+  const token = (await cookieStore).get("hii_box_token")?.value;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -43,9 +46,9 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Web3Provider cookies={cookies}>
+          <Web3Provider cookies={cookies2}>
             <div className="relative w-screen min-h-screen overflow-hidden">
-              <HeroHeader />
+              <HeroHeader token={token ?? ""} />
               <div className="absolute inset-0 -z-20 h-[50vh] overflow-hidden">
                 <Image
                   src="https://giveaway.hii.link/background.avif"

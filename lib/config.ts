@@ -44,16 +44,29 @@ const normalizeAddress = (address: string): string => {
 };
 
 export const siweConfig = createSIWEConfig({
-  getMessageParams: async () => ({
-    domain: typeof window !== "undefined" ? window.location.host : "",
-    uri: typeof window !== "undefined" ? window.location.origin : "",
-    chains: networks.map((chain: AppKitNetwork) =>
-      parseInt(chain.id.toString())
-    ),
-    statement: "Please sign with your account",
-  }),
-  createMessage: ({ address, ...args }: SIWECreateMessageArgs) =>
-    formatMessage(args, normalizeAddress(address)),
+  getMessageParams: async () => {
+    const domain = window.location.host;
+    const uri = window.location.origin;
+    const address = window.ethereum?.selectedAddress;
+
+    return {
+      domain,
+      uri,
+      statement: `Sign this message to log in with your wallet: ${address}`,
+      chains: networks.map((chain: AppKitNetwork) =>
+        parseInt(chain.id.toString())
+      ),
+    };
+  },
+  createMessage: ({ address, ...args }: SIWECreateMessageArgs) => {
+    return formatMessage(
+      {
+        ...args,
+        statement: `Sign this message to log in with your wallet: ${address}`,
+      },
+      normalizeAddress(address)
+    );
+  },
   getNonce: async () => {
     const nonce = await getCsrfToken();
     if (!nonce) {

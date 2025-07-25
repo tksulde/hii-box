@@ -1,10 +1,48 @@
 "use client";
+
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 import { ConnectButton } from "./connect-button";
+// import { useAccount, useSignMessage } from "wagmi";
 
-export const HeroHeader = () => {
+export const HeroHeader = ({ token }: { token: string }) => {
+  // const { signMessageAsync } = useSignMessage();
+  // const { address, isConnected } = useAccount();
+
+  console.log(token);
+
+  // useEffect(() => {
+  //   if (isConnected && !token) {
+  //     async function loginWithWallet() {
+  //       try {
+  //         const message = `Sign this message to log in with your wallet: ${address}`;
+  //         const signature = await signMessageAsync({ message });
+
+  //         const res = await fetch("/api/auth/login", {
+  //           body: JSON.stringify({
+  //             wallet_address: address,
+  //             signed_message: signature,
+  //           }),
+  //         });
+
+  //         if (!res.ok) {
+  //           const error = await res.json();
+  //           console.error("Login failed:", error);
+  //           return;
+  //         }
+
+  //         const result = await res.json();
+  //         console.log("Login success:", result);
+  //       } catch (err) {
+  //         console.error("Wallet login error:", err);
+  //       }
+  //     }
+
+  //     loginWithWallet();
+  //   }
+  // }, [address, isConnected, signMessageAsync, token]);
+
   return (
     <header data-state={"active"} className="fixed z-20 w-full px-2 py-10 ">
       <div className="mx-auto transition-all duration-300 px-4 max-w-[986px] rounded-[10px] border bg-black">
