@@ -18,7 +18,6 @@ interface UserStats {
 
 export default function Dashboard() {
   const { address } = useAccount();
-  // const { data: balance } = useBalance({ address });
   const [userStats, setUserStats] = useState<UserStats>({
     keysEarned: 3,
     boxesOpened: 1,
@@ -26,22 +25,7 @@ export default function Dashboard() {
     completedTasks: 4,
   });
 
-  // useEffect(() => {
-  //   // Fetch user stats from API
-  //   const fetchUserStats = async () => {
-  //     try {
-  //       const response = await fetch(`/api/user/${address}/stats`);
-  //       const stats = await response.json();
-  //       setUserStats(stats);
-  //     } catch (error) {
-  //       console.error("Failed to fetch user stats:", error);
-  //     }
-  //   };
-
-  //   if (address) {
-  //     fetchUserStats();
-  //   }
-  // }, [address]);
+  // const { data } = useSession();
 
   return (
     <div className="w-full">

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import NextAuth from "next-auth";
 import credentialsProvider from "next-auth/providers/credentials";
 import {
@@ -13,8 +12,7 @@ declare module "next-auth" {
   interface Session extends SIWESession {
     address: string;
     chainId: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    backendToken?: any;
+    user?: any;
   }
 }
 
@@ -59,11 +57,10 @@ const providers = [
           return null;
         }
 
-        console.log("✅ Signature verified:", address);
-
         const bodyyy = JSON.stringify({
           wallet_address: address,
           signed_message: signature,
+          message,
         });
 
         // ✅ Optional: call your FastAPI backend for login and JWT
@@ -76,18 +73,16 @@ const providers = [
           }
         );
 
-        console.log("backendRes ->", await backendRes.json());
-
         if (!backendRes.ok) {
           console.error("❌ Backend login failed");
           return null;
         }
 
-        const { access_token, refresh_token } = await backendRes.json();
+        const user = await backendRes.json();
 
         return {
           id: `${chainId}:${address}`,
-          backendToken: access_token, // 💡 pass token to session
+          user: user, // 💡 pass token to session
         };
       } catch (e) {
         console.error("authorize() error:", e);
@@ -108,14 +103,14 @@ const handler = NextAuth({
         session.address = address;
         session.chainId = parseInt(chainId, 10);
       }
-      if (token.backendToken) {
-        session.backendToken = token.backendToken;
+      if (token.user) {
+        session.user = token.user;
       }
       return session;
     },
     jwt({ token, user }) {
       if (user) {
-        token.backendToken = (user as any).backendToken;
+        token.user = (user as any).user;
       }
       return token;
     },

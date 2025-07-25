@@ -47,12 +47,10 @@ export const siweConfig = createSIWEConfig({
   getMessageParams: async () => {
     const domain = window.location.host;
     const uri = window.location.origin;
-    const address = window.ethereum?.selectedAddress;
 
     return {
       domain,
       uri,
-      statement: `Sign this message to log in with your wallet: ${address}`,
       chains: networks.map((chain: AppKitNetwork) =>
         parseInt(chain.id.toString())
       ),
@@ -62,7 +60,6 @@ export const siweConfig = createSIWEConfig({
     return formatMessage(
       {
         ...args,
-        statement: `Sign this message to log in with your wallet: ${address}`,
       },
       normalizeAddress(address)
     );
