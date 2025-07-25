@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "wagmi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TaskList } from "@/components/task-list";
-import { BoxOpening } from "@/components/box-opening";
-import { RewardHistory } from "@/components/reward-history";
 import { Key, Gift, Trophy, Coins } from "lucide-react";
 
 interface UserStats {
@@ -17,7 +12,8 @@ interface UserStats {
 }
 
 export default function Dashboard() {
-  const { address } = useAccount();
+  // const { address } = useAccount();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userStats, setUserStats] = useState<UserStats>({
     keysEarned: 3,
     boxesOpened: 1,
@@ -40,7 +36,7 @@ export default function Dashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Keys Available
             </CardTitle>
-            <Key className="h-4 w-4 text-muted-foreground" />
+            <Key className="h-4 w-4 text-green-600 " />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{userStats.keysEarned}</div>
@@ -53,7 +49,7 @@ export default function Dashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Boxes Opened
             </CardTitle>
-            <Gift className="h-4 w-4 text-muted-foreground" />
+            <Gift className="h-4 w-4 text-green-600 " />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{userStats.boxesOpened}</div>
@@ -66,7 +62,7 @@ export default function Dashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               APE Earned
             </CardTitle>
-            <Coins className="h-4 w-4 text-muted-foreground" />
+            <Coins className="h-4 w-4 text-green-600 " />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{userStats.totalRewards}</div>
@@ -79,7 +75,7 @@ export default function Dashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Progress
             </CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
+            <Trophy className="h-4 w-4 text-green-600 " />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
@@ -92,61 +88,63 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <Tabs defaultValue="tasks" className="space-y-8">
-        <TabsList className="grid w-full grid-cols-3 bg-muted/50">
-          <TabsTrigger
-            value="tasks"
-            className="data-[state=active]:bg-background"
-          >
-            Tasks & Keys
-          </TabsTrigger>
-          <TabsTrigger
-            value="boxes"
-            className="data-[state=active]:bg-background"
-          >
-            Open Boxes
-          </TabsTrigger>
-          <TabsTrigger
-            value="rewards"
-            className="data-[state=active]:bg-background"
-          >
-            Rewards
-          </TabsTrigger>
-        </TabsList>
+      {/* <div>
+        <Tabs defaultValue="tasks" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-3 bg-muted/50">
+            <TabsTrigger
+              value="tasks"
+              className="data-[state=active]:bg-background"
+            >
+              Tasks & Keys
+            </TabsTrigger>
+            <TabsTrigger
+              value="boxes"
+              className="data-[state=active]:bg-background"
+            >
+              Open Boxes
+            </TabsTrigger>
+            <TabsTrigger
+              value="rewards"
+              className="data-[state=active]:bg-background"
+            >
+              Rewards
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="tasks" className="animate-fade-in">
-          <TaskList
-            userAddress={address}
-            onTaskComplete={() => {
-              setUserStats((prev) => ({
-                ...prev,
-                keysEarned: prev.keysEarned + 1,
-                completedTasks: prev.completedTasks + 1,
-              }));
-            }}
-          />
-        </TabsContent>
+          <TabsContent value="tasks" className="animate-fade-in">
+            <TaskList
+              userAddress={address}
+              onTaskComplete={() => {
+                setUserStats((prev) => ({
+                  ...prev,
+                  keysEarned: prev.keysEarned + 1,
+                  completedTasks: prev.completedTasks + 1,
+                }));
+              }}
+            />
+          </TabsContent>
 
-        <TabsContent value="boxes" className="animate-fade-in">
-          <BoxOpening
-            availableKeys={userStats.keysEarned}
-            onBoxOpened={(reward) => {
-              setUserStats((prev) => ({
-                ...prev,
-                keysEarned: prev.keysEarned - 1,
-                boxesOpened: prev.boxesOpened + 1,
-                totalRewards:
-                  prev.totalRewards +
-                  (reward.type === "ape" ? reward.amount ?? 0 : 0),
-              }));
-            }}
-          />
-        </TabsContent>
+          <TabsContent value="boxes" className="animate-fade-in">
+            <BoxOpening
+              availableKeys={userStats.keysEarned}
+              onBoxOpened={(reward) => {
+                setUserStats((prev) => ({
+                  ...prev,
+                  keysEarned: prev.keysEarned - 1,
+                  boxesOpened: prev.boxesOpened + 1,
+                  totalRewards:
+                    prev.totalRewards +
+                    (reward.type === "ape" ? reward.amount ?? 0 : 0),
+                }));
+              }}
+            />
+          </TabsContent>
 
-        <TabsContent value="rewards" className="animate-fade-in">
-          <RewardHistory userAddress={address} />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="rewards" className="animate-fade-in">
+            <RewardHistory userAddress={address} />
+          </TabsContent>
+        </Tabs>
+      </div> */}
     </div>
   );
 }

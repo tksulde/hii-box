@@ -135,13 +135,13 @@ export function TaskList({ userAddress, onTaskComplete }: TaskListProps) {
 
     switch (type) {
       case "social":
-        return <Twitter className="h-5 w-5 text-muted-foreground" />;
+        return <Twitter className="h-5 w-5 text-green-600 " />;
       case "nft":
-        return <Heart className="h-5 w-5 text-muted-foreground" />;
+        return <Heart className="h-5 w-5 text-green-600" />;
       case "onchain":
-        return <MessageCircle className="h-5 w-5 text-muted-foreground" />;
+        return <MessageCircle className="h-5 w-5 text-green-600" />;
       default:
-        return <Circle className="h-5 w-5 text-muted-foreground" />;
+        return <Circle className="h-5 w-5 text-green-600" />;
     }
   };
 

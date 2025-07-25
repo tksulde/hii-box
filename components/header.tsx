@@ -44,7 +44,7 @@ export const HeroHeader = ({ token }: { token: string }) => {
   // }, [address, isConnected, signMessageAsync, token]);
 
   return (
-    <header data-state={"active"} className="fixed z-20 w-full px-2 py-10 ">
+    <header className="fixed z-20 w-full px-2 py-10 ">
       <div className="mx-auto transition-all duration-300 px-4 max-w-[986px] rounded-[10px] border bg-black">
         <div className="relative flex flex-wrap items-center justify-between gap-6 py-2">
           <div className="flex w-full justify-between lg:w-auto">

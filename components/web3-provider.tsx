@@ -12,10 +12,10 @@ const queryClient = new QueryClient();
 
 // Set up metadata
 const metadata = {
-  name: "next-reown-appkit",
-  description: "next-reown-appkit",
-  url: "https://github.com/0xonerb/next-reown-appkit-ssr", // origin must match your domain & subdomain
-  icons: ["https://avatars.githubusercontent.com/u/179229932"],
+  name: "Hii Box Opening",
+  description: "Hii Box Opening",
+  url: "https://hii-box.vercel.app",
+  icons: ["https://hii-box.vercel.app/favicon.ico"],
 };
 
 // Create the modal
