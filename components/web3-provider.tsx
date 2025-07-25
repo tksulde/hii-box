@@ -29,7 +29,7 @@ export const modal = createAppKit({
     analytics: true, // Optional - defaults to your Cloud configuration
   },
   themeVariables: {
-    "--w3m-accent": "#fff",
+    "--w3m-accent": "#ccc",
   },
   siweConfig: siweConfig,
 });
