@@ -24,6 +24,7 @@ declare module "next-auth" {
     user: UserData;
     accessToken?: string;
     refreshToken?: string;
+    error?: string;
   }
 
   interface User extends ExtendedUser {}

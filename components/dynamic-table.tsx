@@ -68,8 +68,8 @@ interface DynamicTableProps {
   columns: ColumnDef[];
   onAdd?: (item: DataItem) => Promise<void> | void;
   onEdit?: (item: DataItem) => Promise<void> | void;
-  onDelete?: (id: string) => Promise<void> | void;
-  onDeleteMultiple?: (ids: string[]) => Promise<void> | void;
+  onDelete?: (id: number) => Promise<void> | void;
+  onDeleteMultiple?: (ids: number[]) => Promise<void> | void;
   onFilterChange?: (field: string, value: string) => Promise<void> | void;
   initialFormData?: DataItem;
   renderFormFields?: (
@@ -194,9 +194,9 @@ interface TableHeaderComponentProps {
   sortConfig: { key: string; direction: "asc" | "desc" | null };
   handleSort: (key: string) => void;
   showActions: boolean;
-  onDelete: ((id: string) => Promise<void> | void) | undefined;
+  onDelete: ((id: number) => Promise<void> | void) | undefined;
   paginatedData: DataItem[];
-  selectedRows: (string | number)[];
+  selectedRows: number[];
   handleSelectAll: () => void;
   isLoading: boolean;
 }
@@ -262,10 +262,10 @@ interface TableBodyComponentProps {
   paginatedData: DataItem[];
   columns: ColumnDef[];
   showActions: boolean;
-  onDelete: ((id: string) => Promise<void> | void) | undefined;
+  onDelete: ((id: number) => Promise<void> | void) | undefined;
   onEdit: ((item: DataItem) => Promise<void> | void) | undefined;
-  selectedRows: (string | number)[];
-  handleSelectRow: (id: string | number) => void;
+  selectedRows: number[];
+  handleSelectRow: (id: number) => void;
   openModal: (type: ModalType, row?: DataItem) => void;
   isLoading: boolean;
 }
@@ -521,7 +521,7 @@ interface ModalContentProps {
   handleSaveEdit: () => Promise<void>;
   handleDelete: () => Promise<void>;
   handleDeleteSelected: () => Promise<void>;
-  selectedRows: (string | number)[];
+  selectedRows: number[];
 }
 
 const ModalContent: React.FC<ModalContentProps> = ({
@@ -707,7 +707,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
   onDelete,
   onDeleteMultiple,
   onFilterChange,
-  initialFormData = { id: "" }, // Default to an empty DataItem
+  initialFormData = { id: 0 }, // Default to an empty DataItem
   renderFormFields,
   isLoading = false,
   title = "Items",
@@ -719,11 +719,11 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
   itemsPerPage = 10,
 }) => {
   const [filteredData, setFilteredData] = useState<DataItem[]>(initialData);
-  const [selectedRows, setSelectedRows] = useState<(number | string)[]>([]);
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [editFormData, setEditFormData] = useState<DataItem>(initialFormData);
-  const [currentId, setCurrentId] = useState<string | null>(null);
+  const [currentId, setCurrentId] = useState<number | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -914,11 +914,11 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
       setModalType(type);
       if (type === "edit" && row) {
         setEditFormData(row);
-        setCurrentId(String(row.id));
+        setCurrentId(row.id);
       } else if (type === "add") {
         setEditFormData(initialFormData);
       } else if (type === "delete" && row) {
-        setCurrentId(String(row.id));
+        setCurrentId(row.id);
       }
       setModalOpen(true);
     },
@@ -934,7 +934,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
   }, [initialFormData]);
 
   // Row selection handlers
-  const handleSelectRow = useCallback((id: string | number) => {
+  const handleSelectRow = useCallback((id: number) => {
     if (id == null) return;
     setSelectedRows((prev) =>
       prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
@@ -1003,7 +1003,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
       const rowsToDelete = selectedRows.filter((id) =>
         paginatedData.some((row) => row.id === id)
       );
-      await onDeleteMultiple(rowsToDelete.map(String));
+      await onDeleteMultiple(rowsToDelete);
       setSelectedRows((prev) =>
         prev.filter((id) => !rowsToDelete.includes(id))
       );

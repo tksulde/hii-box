@@ -8,12 +8,47 @@ import {
 } from "@reown/appkit-siwe";
 import { createPublicClient, http } from "viem";
 import { ExtendedUser } from "@/types/next-auth";
+import axios from "axios";
+import { JWT } from "next-auth/jwt";
 
 const nextAuthSecret = process.env.NEXTAUTH_SECRET;
 if (!nextAuthSecret) throw new Error("NEXTAUTH_SECRET is not set");
 
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 if (!projectId) throw new Error("NEXT_PUBLIC_PROJECT_ID is not set");
+
+async function refreshAccessToken(token: JWT) {
+  try {
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/refresh`,
+      {
+        refresh_token: token.refreshToken,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const refreshedTokens = response.data;
+    console.log("✅ Token refreshed successfully");
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.access_token,
+      refreshToken: token.refreshToken, // Keep the same refresh token
+      accessTokenExpires: Date.now() + 15 * 60 * 1000, // 15 minutes
+      error: undefined,
+    };
+  } catch (error) {
+    console.error("❌ Error refreshing access token:", error);
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    };
+  }
+}
 
 const providers = [
   credentialsProvider({
@@ -79,9 +114,9 @@ const providers = [
             id: user.id,
             wallet_address: user.wallet_address,
             username: user.username,
-            token: user.access_token, // Changed from user.token to user.access_token
-            refreshToken: user.refresh_token, // Added refresh token
-            role: user.role || "user", // Default to "user" if role not provided
+            token: user.access_token,
+            refreshToken: user.refresh_token,
+            role: user.role || "user",
           },
         };
       } catch (e) {
@@ -128,9 +163,9 @@ const providers = [
           user: {
             id: user.id,
             username: user.username,
-            token: user.access_token, // Changed from user.token to user.access_token
-            refreshToken: user.refresh_token, // Added refresh token
-            role: user.role || "admin", // Default to "admin" for admin login
+            token: user.access_token,
+            refreshToken: user.refresh_token,
+            role: user.role || "admin",
           },
         };
       } catch (e) {
@@ -147,16 +182,23 @@ const handler = NextAuth({
   session: { strategy: "jwt" },
   callbacks: {
     async session({ session, token }) {
+      // Handle refresh token errors
+      if (token.error === "RefreshAccessTokenError") {
+        return { ...session, error: "RefreshAccessTokenError" };
+      }
+
       if (token.sub && token.sub.includes(":")) {
         const [, chainId, address] = token.sub.split(":");
         session.address = address;
         session.chainId = parseInt(chainId, 10);
       }
+
       if (token.user) {
         session.user = token.user;
         session.accessToken = token.accessToken;
         session.refreshToken = token.refreshToken;
       }
+
       return session;
     },
     async jwt({ token, user }) {
@@ -167,18 +209,24 @@ const handler = NextAuth({
           accessToken: user.user.token,
           refreshToken: user.user.refreshToken,
           accessTokenExpires: Date.now() + 15 * 60 * 1000,
-          user: user.user, // Store the user data directly
+          user: user.user,
         };
+      }
+
+      // If there was an error before, return the error
+      if (token.error) {
+        return token;
       }
 
       // Return previous token if the access token has not expired yet
       if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
+        console.log("✅ Access token still valid");
         return token;
       }
 
       // Access token has expired, try to refresh it
-      // You might want to implement refresh logic here if needed
-      return token;
+      console.log("⏰ Access token expired, refreshing...");
+      return refreshAccessToken(token);
     },
   },
 });

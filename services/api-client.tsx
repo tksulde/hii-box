@@ -10,10 +10,18 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     const session = await getSession();
+
+    // Check for refresh token error
+    if (session?.error === "RefreshAccessTokenError") {
+      console.error("❌ Session has refresh token error, signing out");
+      await signOut({ redirect: true, callbackUrl: "/" });
+      return Promise.reject(new Error("Session expired"));
+    }
+
     if (session?.accessToken) {
       config.headers["Authorization"] = `Bearer ${session.accessToken}`;
     } else {
-      console.warn("No access token found in session:", session);
+      console.warn("⚠️ No access token found in session");
     }
     return config;
   },
@@ -33,16 +41,25 @@ apiClient.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
+      console.log("🔄 401 error, attempting to refresh session...");
+
+      // Force NextAuth to refresh the session
       const session = await getSession();
-      if (!session?.accessToken) {
-        throw new Error("No session or access token");
+
+      if (
+        !session?.accessToken ||
+        session.error === "RefreshAccessTokenError"
+      ) {
+        throw new Error("No valid session after refresh");
       }
 
+      // Retry the original request with the new token
       originalRequest.headers[
         "Authorization"
       ] = `Bearer ${session.accessToken}`;
       return apiClient(originalRequest);
     } catch (refreshError) {
+      console.error("❌ Failed to refresh session, signing out");
       await signOut({ redirect: true, callbackUrl: "/" });
       return Promise.reject(refreshError);
     }

@@ -21,35 +21,26 @@ export default function UsersPage() {
   const [currentFilter, setCurrentFilter] = useState<string | null>(null);
 
   const initialUser: User = {
-    id: "",
-    email: "",
-    role: "",
-    is_verified: false,
+    id: 0,
+    wallet_address: "",
+    key_count: 0,
     created_at: "",
     updated_at: "",
   };
 
   const columns: ColumnDef[] = [
-    { key: "email", label: "Email", sortable: true, searchable: true },
     {
-      key: "role",
-      label: "Role",
+      key: "wallet_address",
+      label: "Wallet Address",
       sortable: true,
-      filterable: true,
-      filterOptions: [
-        { label: "Admin", value: "admin" },
-        { label: "User", value: "user" },
-      ] as FilterOption[],
-      render: (value: unknown) => {
-        const role = String(value).toLowerCase();
-        const capitalizedRole = role.charAt(0).toUpperCase() + role.slice(1);
-        return (
-          <Badge variant={role === "admin" ? "default" : "secondary"}>
-            {capitalizedRole}
-          </Badge>
-        );
-      },
+      render: (value: unknown) =>
+        value
+          ? String(value).substring(0, 5) +
+            "..." +
+            String(value).substring(String(value).length - 7)
+          : "--",
     },
+    { key: "key_count", label: "Key Count", sortable: true },
     {
       key: "created_at",
       label: "Created At",
@@ -69,7 +60,7 @@ export default function UsersPage() {
   const getData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await get_request("/dashboard/user");
+      const res = await get_request("/dashboard/users");
       setUsers(res.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -88,12 +79,12 @@ export default function UsersPage() {
     async (newUser: any) => {
       setActionLoading(true);
       try {
-        // Validate email format
-        if (!newUser.email?.includes("@")) {
-          throw new Error("Please enter a valid email address");
+        // Validate wallet_address format
+        if (!newUser.wallet_address?.includes("@")) {
+          throw new Error("Please enter a valid wallet_address address");
         }
 
-        const response = await post_request("/dashboard/user", newUser, {
+        const response = await post_request("/dashboard/users", newUser, {
           "Content-Type": "application/json",
         });
 
@@ -131,11 +122,11 @@ export default function UsersPage() {
     async (user: any) => {
       setActionLoading(true);
       try {
-        // Validate email format
-        if (!user.email?.includes("@")) {
-          throw new Error("Please enter a valid email address");
+        // Validate wallet_address format
+        if (!user.wallet_address?.includes("@")) {
+          throw new Error("Please enter a valid wallet_address address");
         }
-        const { id, email, activation_expires } = user;
+        const { id, wallet_address, activation_expires } = user;
 
         const activationDate = new Date(activation_expires);
         if (isNaN(activationDate.getTime())) {
@@ -144,12 +135,12 @@ export default function UsersPage() {
 
         const patchData = {
           id,
-          email,
+          wallet_address,
           activation_expires,
         };
 
         const response = await patch_request(
-          "/dashboard/user",
+          "/dashboard/users",
           user.id!,
           patchData,
           "application/json"
@@ -187,10 +178,10 @@ export default function UsersPage() {
   );
 
   const handleDelete = useCallback(
-    async (id: string) => {
+    async (id: number) => {
       setActionLoading(true);
       try {
-        const response = await delete_request("/dashboard/user", id);
+        const response = await delete_request("/dashboard/users", id);
         if (response.status == 200) {
           getData();
           toast("Амжилттай", {
@@ -218,12 +209,12 @@ export default function UsersPage() {
   );
 
   const handleDeleteMultiple = useCallback(
-    async (ids: string[]) => {
+    async (ids: number[]) => {
       setActionLoading(true);
       try {
         // Perform delete operations for all ids in parallel
         const deletePromises = ids.map((id) =>
-          delete_request("/dashboard/user", id)
+          delete_request("/dashboard/users", id)
             .then((response) => {
               if (response.status !== 200) {
                 throw new Error(`Failed to delete user with ID: ${id}`);
@@ -259,7 +250,7 @@ export default function UsersPage() {
     setCurrentFilter(value || null);
     setActionLoading(true);
     try {
-      const baseUrl = "/dashboard/user";
+      const baseUrl = "/dashboard/users";
       let url = baseUrl;
       if (value) {
         const params = new URLSearchParams();
@@ -283,16 +274,28 @@ export default function UsersPage() {
     return (
       <div className="py-4">
         <div className="flex gap-4 items-center mb-4">
-          <label htmlFor="email" className="font-medium w-1/4">
-            Email
+          <label htmlFor="wallet_address" className="font-medium w-1/4">
+            Wallet Address
           </label>
           <Input
-            id="email"
-            type="email"
+            id="wallet_address"
+            type="text"
             className="flex-1"
-            value={formData.email || ""}
-            onChange={(e) => handleChange("email", e.target.value)}
-            required
+            value={formData.wallet_address || ""}
+            onChange={(e) => handleChange("wallet_address", e.target.value)}
+            disabled
+          />
+        </div>
+        <div className="flex gap-4 items-center mb-4">
+          <label htmlFor="key_count" className="font-medium w-1/4">
+            Key Count
+          </label>
+          <Input
+            id="key_count"
+            type="number"
+            className="flex-1"
+            value={formData.key_count || ""}
+            onChange={(e) => handleChange("key_count", e.target.value)}
           />
         </div>
       </div>
@@ -309,7 +312,7 @@ export default function UsersPage() {
         <DynamicTable
           data={users}
           columns={columns}
-          onAdd={handleAdd}
+          // onAdd={handleAdd}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onDeleteMultiple={handleDeleteMultiple}

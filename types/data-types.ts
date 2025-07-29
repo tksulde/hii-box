@@ -3,12 +3,12 @@ interface ModalProps {
 }
 
 interface DataItem {
-  id: string | number;
+  id: number;
   [key: string]: unknown;
 }
 
 interface AccessLog extends DataItem {
-  id: string;
+  id: number;
   endpoint: string;
   method: string;
   status_code: number;
@@ -23,7 +23,7 @@ interface AccessLog extends DataItem {
 }
 
 interface ApiKeyLog extends DataItem {
-  id: string;
+  id: number;
   user_email: string;
   key: string;
   type: string;
@@ -31,8 +31,8 @@ interface ApiKeyLog extends DataItem {
 }
 
 interface ApiKey extends DataItem {
-  id: string;
-  user_id: string;
+  id: number;
+  user_id: number;
   user_email: string;
   key: string;
   created_at?: string;
@@ -40,8 +40,8 @@ interface ApiKey extends DataItem {
 }
 
 interface Payment extends DataItem {
-  id: string;
-  user_id: string;
+  id: number;
+  user_id: number;
   user_email: string;
   subscription_plan_details?: Record<string, any>;
   subscription_expiry_from?: string;
@@ -51,9 +51,9 @@ interface Payment extends DataItem {
 }
 
 interface AuthRequest extends DataItem {
-  id: string;
+  id: number;
   callback_url: string;
-  user_id: string;
+  user_id: number;
   user_email: string;
   is_active: boolean;
   created_at?: string;
@@ -61,9 +61,9 @@ interface AuthRequest extends DataItem {
 }
 
 interface ExtractRequest extends DataItem {
-  id: string;
+  id: number;
   callback_url: string;
-  user_id: string;
+  user_id: number;
   user_email: string;
   is_active: boolean;
   created_at?: string;
@@ -71,9 +71,9 @@ interface ExtractRequest extends DataItem {
 }
 
 interface ExtractRequest extends DataItem {
-  id: string;
+  id: number;
   callback_url: string;
-  user_id: string;
+  user_id: number;
   user_email: string;
   is_active: boolean;
   created_at?: string;
@@ -81,9 +81,9 @@ interface ExtractRequest extends DataItem {
 }
 
 interface SignRequest extends DataItem {
-  id: string;
+  id: number;
   callback_url: string;
-  user_id: string;
+  user_id: number;
   user_email: string;
   is_active: boolean;
   created_at?: string;
@@ -91,7 +91,7 @@ interface SignRequest extends DataItem {
 }
 
 interface SubscriptionPlan extends DataItem {
-  id: string;
+  id: number;
   plan_name?: string;
   price?: number;
   years?: number;
@@ -104,8 +104,8 @@ interface SubscriptionPlan extends DataItem {
 }
 
 interface UserSubscription extends DataItem {
-  id: string;
-  user_id: string;
+  id: number;
+  user_id: number;
   user_email: string;
   expiry_date: "";
   status: "";
@@ -114,43 +114,42 @@ interface UserSubscription extends DataItem {
 }
 
 interface User extends DataItem {
-  id: string;
-  email: string;
-  role: string;
-  is_verified: boolean;
+  id: number;
+  wallet_address: string;
+  key_count: number;
   created_at?: string;
   updated_at?: string;
 }
 
 interface UserPayment {
-  id: string;
-  user_id: string;
+  id: number;
+  user_id: number;
   subscription_plan_details: Record<string, any>;
   created_at?: string;
 }
 
 interface Item extends DataItem {
-  id: string;
+  id: number;
   name: string;
   description: string;
   price?: number;
-  category_id: string;
+  category_id: number;
   sub_category_id?: string;
   created_at?: string;
   updated_at?: string;
 }
 
 interface Category extends DataItem {
-  id: string;
+  id: number;
   name: string;
   created_at?: string;
   updated_at?: string;
 }
 
 interface SubCategory extends DataItem {
-  id: string;
+  id: number;
   name: string;
-  category_id: string;
+  category_id: number;
   created_at?: string;
   updated_at?: string;
 }
