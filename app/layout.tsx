@@ -1,13 +1,10 @@
-import type React from "react";
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { cookies, headers } from "next/headers";
-import Image from "next/image";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import Web3Provider from "@/components/web3-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { HeroHeader } from "@/components/header";
+import AuthClientProvider from "@/context/auth-client-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,23 +19,26 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Hiilink Box Opening",
   description: "Hiilink Box Opening",
+  icons: {
+    icon: "/favicon.ico",
+  },
+  openGraph: {
+    title: "Hiilink Box Opening",
+    description: "Hiilink Box Opening",
+    url: "https://your-site.com",
+    images: ["https://giveaway.hii.link/og-image.jpg"],
+  },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersData = await headers();
-  const cookies2 = headersData.get("cookie");
-
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("hii_box_token")?.value;
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"
@@ -46,38 +46,10 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Web3Provider cookies={cookies2}>
-            <div className="relative w-screen min-h-screen overflow-hidden">
-              <HeroHeader token={token ?? ""} />
-              <div className="absolute inset-0 -z-20 h-[50vh] overflow-hidden">
-                <Image
-                  src="https://giveaway.hii.link/background.avif"
-                  alt="Background decoration"
-                  width={986}
-                  height={100}
-                  className="absolute -top-36 left-1/6"
-                  priority
-                />
-                <Image
-                  src="https://giveaway.hii.link/pattern.avif"
-                  alt="Pattern overlay"
-                  width={700}
-                  height={700}
-                  className="absolute -top-36 left-1/6 mix-blend-overlay h-[90vh] w-auto mx-auto"
-                />
-
-                <div
-                  aria-hidden
-                  className="bg-linear-to-b to-background absolute inset-0 z-10 from-transparent from-35%"
-                />
-              </div>
-              <div className="min-w-[50%] h-screen bg-[radial-gradient(circle,rgba(108,108,108,1)_0%,rgba(0,0,0,1)_70%)] absolute top-0 left-0 translate-x-1/2 -translate-y-[70%] -z-50" />
-              <main className="relative z-10 container mx-auto max-w-[986px] py-8 mt-12">
-                {children}
-              </main>
-              <Toaster />
-            </div>
-          </Web3Provider>
+          <AuthClientProvider>
+            {children}
+            <Toaster />
+          </AuthClientProvider>
         </ThemeProvider>
       </body>
     </html>

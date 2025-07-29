@@ -81,7 +81,7 @@ export const siweConfig = createSIWEConfig({
   },
   verifyMessage: async ({ message, signature }: SIWEVerifyMessageArgs) => {
     try {
-      const success = await signIn("credentials", {
+      const success = await signIn("user-login", {
         message,
         redirect: false,
         signature,
