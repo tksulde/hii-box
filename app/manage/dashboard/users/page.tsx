@@ -69,7 +69,7 @@ export default function UsersPage() {
   const getData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await get_request("/manage/user");
+      const res = await get_request("/dashboard/user");
       setUsers(res.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -93,7 +93,7 @@ export default function UsersPage() {
           throw new Error("Please enter a valid email address");
         }
 
-        const response = await post_request("/manage/user", newUser, {
+        const response = await post_request("/dashboard/user", newUser, {
           "Content-Type": "application/json",
         });
 
@@ -149,7 +149,7 @@ export default function UsersPage() {
         };
 
         const response = await patch_request(
-          "/manage/user",
+          "/dashboard/user",
           user.id!,
           patchData,
           "application/json"
@@ -190,7 +190,7 @@ export default function UsersPage() {
     async (id: string) => {
       setActionLoading(true);
       try {
-        const response = await delete_request("/manage/user", id);
+        const response = await delete_request("/dashboard/user", id);
         if (response.status == 200) {
           getData();
           toast("Амжилттай", {
@@ -223,7 +223,7 @@ export default function UsersPage() {
       try {
         // Perform delete operations for all ids in parallel
         const deletePromises = ids.map((id) =>
-          delete_request("/manage/user", id)
+          delete_request("/dashboard/user", id)
             .then((response) => {
               if (response.status !== 200) {
                 throw new Error(`Failed to delete user with ID: ${id}`);
@@ -259,7 +259,7 @@ export default function UsersPage() {
     setCurrentFilter(value || null);
     setActionLoading(true);
     try {
-      const baseUrl = "/manage/user";
+      const baseUrl = "/dashboard/user";
       let url = baseUrl;
       if (value) {
         const params = new URLSearchParams();
