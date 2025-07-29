@@ -58,7 +58,7 @@ const providers = [
         });
 
         const backendRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/login`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -108,7 +108,7 @@ const providers = [
         const bodyyy = JSON.stringify({ username, password });
 
         const backendRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/admin-login`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/admin-login`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

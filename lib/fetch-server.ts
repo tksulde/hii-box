@@ -21,7 +21,7 @@ export async function fetchServer<T>(
   };
 
   try {
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const res = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
       ...options,
       headers,
       signal: controller.signal,
