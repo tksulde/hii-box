@@ -20,18 +20,18 @@ export default function Dashboard() {
   const { data: session } = useSession();
   console.log("session:", session);
 
-  useEffect(() => {
-    if (!address) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (!address) {
+  //     return;
+  //   }
 
-    async function getUserStats() {
-      const res = await get_request("/user/me");
-      console.log(res.data);
-    }
+  //   async function getUserStats() {
+  //     const res = await get_request("/user/me");
+  //     console.log(res.data);
+  //   }
 
-    getUserStats();
-  }, [address]);
+  //   getUserStats();
+  // }, []);
 
   const [userStats, setUserStats] = useState<UserStats>({
     keysEarned: 3,
