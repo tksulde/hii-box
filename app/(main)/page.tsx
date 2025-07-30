@@ -17,21 +17,30 @@ interface UserStats {
 
 export default function Dashboard() {
   const { address } = useAccount();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
   console.log("session:", session);
 
-  // useEffect(() => {
-  //   if (!address) {
-  //     return;
-  //   }
+  useEffect(() => {
+    if (!address) {
+      return;
+    }
 
-  //   async function getUserStats() {
-  //     const res = await get_request("/user/me");
-  //     console.log(res.data);
-  //   }
+    if (status === "loading") {
+      return;
+    }
 
-  //   getUserStats();
-  // }, []);
+    if (status === "unauthenticated") {
+      return;
+    }
+
+    async function getUserStats() {
+      const res = await get_request("/user/me");
+      console.log(res.data);
+    }
+
+    getUserStats();
+  }, [address, status]);
 
   const [userStats, setUserStats] = useState<UserStats>({
     keysEarned: 3,
