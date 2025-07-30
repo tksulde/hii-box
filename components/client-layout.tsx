@@ -25,7 +25,7 @@ export default function ClientLayout({
   }, []);
 
   if (!isClient) {
-    return <div className="min-h-screen bg-background" />; // Lightweight fallback
+    return <div className="min-h-screen bg-background" />;
   }
 
   if (isDashboard) {

@@ -7,19 +7,15 @@ interface DataItem {
   [key: string]: unknown;
 }
 
-interface AccessLog extends DataItem {
+interface SupportedNFTCollection extends DataItem {
   id: number;
-  endpoint: string;
-  method: string;
-  status_code: number;
-  api_key_id?: string;
-  data?: Record<string, any>;
-  query_params?: Record<string, any>;
-  headers?: Record<string, any>;
-  duration_ms?: number;
-  ip_address?: string;
-  user_agent?: string;
+  collection_name: string;
+  collection_address: string;
+  description?: string;
+  image_url?: string;
+  website_url?: string;
   created_at?: string;
+  updated_at?: string;
 }
 
 interface ApiKeyLog extends DataItem {

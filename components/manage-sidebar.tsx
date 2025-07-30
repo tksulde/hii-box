@@ -23,7 +23,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
   SidebarRail,
   SidebarMenuSub,
   SidebarMenuSubItem,
@@ -44,7 +43,6 @@ import { useEffect, useState } from "react";
 export default function Sidebar() {
   const { theme } = useTheme();
   const pathname = usePathname();
-  const [isRequestsOpen, setIsRequestsOpen] = useState(false);
 
   const isActive = (path: string) => pathname === path;
 
@@ -55,12 +53,10 @@ export default function Sidebar() {
       href: "/manage/dashboard",
     },
     { icon: Users, label: "Users", href: "/manage/dashboard/users" },
-    { icon: Box, label: "Items", href: "/manage/dashboard/items" },
-    { icon: Boxes, label: "Category", href: "/manage/dashboard/categories" },
     {
-      icon: Boxes,
-      label: "Sub Category",
-      href: "/manage/dashboard/sub-categories",
+      icon: FileUser,
+      label: "Supported NFTs",
+      href: "/manage/dashboard/supported-nfts",
     },
     {
       icon: FileUser,
@@ -85,41 +81,12 @@ export default function Sidebar() {
     },
   ];
 
-  const requestItems = [
-    {
-      icon: PenTool,
-      label: "Sign Request",
-      href: "/manage/dashboard/requests/sign",
-    },
-    {
-      icon: Shield,
-      label: "Auth Request",
-      href: "/manage/dashboard/requests/auth",
-    },
-    {
-      icon: FileSearch,
-      label: "Extract Request",
-      href: "/manage/dashboard/requests/extract",
-    },
-  ];
-
-  const logoSrc = theme === "light" ? "/E-Sign-Light.svg" : "/E-Sign-Dark.svg";
-
-  // Check if any request route is active
-  const isRequestsActive = requestItems.some((item) => isActive(item.href));
-
-  useEffect(() => {
-    if (pathname.startsWith("/manage/dashboard/requests")) {
-      setIsRequestsOpen(true);
-    }
-  }, [pathname]);
-
   return (
     <SidebarComponent>
       <SidebarHeader>
         <div className="border-b flex h-16 items-center px-4">
           <Link href="/manage/dashboard" className="select-none">
-            <Image src={logoSrc} alt="Logo" width={85} height={32} />
+            {/* <Image src={logoSrc} alt="Logo" width={85} height={32} /> */}
             <Label className="text-sm font-secondary cursor-pointer select-none">
               Admin Dashboard
             </Label>
@@ -142,51 +109,7 @@ export default function Sidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-
           {/* Requests Dropdown */}
-          <Collapsible
-            open={isRequestsOpen}
-            onOpenChange={setIsRequestsOpen}
-            className="group/collapsible"
-          >
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  className="px-4 py-3 h-11"
-                  isActive={isRequestsActive}
-                >
-                  <FileText className="h-5 w-5" />
-                  <span>Requests</span>
-                  {isRequestsOpen ? (
-                    <ChevronDown className="ml-auto h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="ml-auto h-4 w-4" />
-                  )}
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  {requestItems.map((item) => (
-                    <SidebarMenuSubItem key={item.label}>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive(item.href)}
-                        className="px-4 py-3 h-12 w-44"
-                      >
-                        <a
-                          href={item.href}
-                          className="flex items-center w-full h-full"
-                        >
-                          <item.icon className="h-5 w-5" />
-                          <span>{item.label}</span>
-                        </a>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
         </SidebarMenu>
       </SidebarContent>
       <SidebarRail />

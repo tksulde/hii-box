@@ -220,7 +220,6 @@ const handler = NextAuth({
 
       // Return previous token if the access token has not expired yet
       if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
-        console.log("✅ Access token still valid");
         return token;
       }
 
