@@ -6,11 +6,9 @@ import Image from "next/image";
 import { ConnectButton } from "./connect-button";
 // import { useAccount, useSignMessage } from "wagmi";
 
-export const HeroHeader = ({ token }: { token: string }) => {
+export const HeroHeader = () => {
   // const { signMessageAsync } = useSignMessage();
   // const { address, isConnected } = useAccount();
-
-  console.log(token);
 
   // useEffect(() => {
   //   if (isConnected && !token) {

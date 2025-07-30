@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiClient, publicApiClient } from "@/services/api-client";
 import axios, { AxiosResponse } from "axios";
 

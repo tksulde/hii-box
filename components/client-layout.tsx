@@ -35,7 +35,7 @@ export default function ClientLayout({
   return (
     <Web3Provider cookies={cookies}>
       <div className="relative w-screen min-h-screen overflow-hidden">
-        <HeroHeader token={token ?? ""} />
+        <HeroHeader />
         <div className="absolute inset-0 -z-20 h-[50vh] overflow-hidden">
           <Image
             src="https://giveaway.hii.link/background.avif"

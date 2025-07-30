@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
@@ -1023,7 +1024,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
   useEffect(() => {
     setFilteredData(initialData);
     handleSearch(searchTerm);
-  }, [initialData, handleSearch]);
+  }, [initialData, handleSearch, searchTerm]);
 
   // Reset page when data changes
   useEffect(() => {

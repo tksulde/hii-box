@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useCallback, useState, useEffect } from "react";
 import {
@@ -7,11 +8,7 @@ import {
   delete_request,
 } from "@/services/crud";
 import { Input } from "@/components/ui/input";
-import DynamicTable, {
-  ColumnDef,
-  FilterOption,
-} from "@/components/dynamic-table";
-import { Badge } from "@/components/ui/badge";
+import DynamicTable, { ColumnDef } from "@/components/dynamic-table";
 import { toast } from "sonner";
 import Image from "next/image";
 

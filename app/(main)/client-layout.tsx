@@ -11,11 +11,9 @@ import { usePathname } from "next/navigation";
 export default function ClientLayout({
   children,
   cookies,
-  token,
 }: Readonly<{
   children: React.ReactNode;
   cookies: string | null;
-  token: string | undefined;
 }>) {
   const [isClient, setIsClient] = useState(false);
   const pathname = usePathname();
@@ -36,27 +34,26 @@ export default function ClientLayout({
   return (
     <Web3Provider cookies={cookies}>
       <div className="relative w-screen min-h-screen overflow-hidden">
-        <HeroHeader token={token ?? ""} />
-        <div className="absolute inset-0 -z-20 h-[50vh] overflow-hidden">
+        <HeroHeader />
+        <div className="absolute inset-0 -z-20 h-[50vh] overflow-hidden w-full mx-auto">
           <Image
             src="https://giveaway.hii.link/background.avif"
             alt="Background decoration"
             width={986}
             height={100}
-            className="absolute -top-36 left-1/6"
+            className="absolute -top-36 left-1/2 -translate-x-1/2 mx-auto"
             priority
-            aria-hidden="true"
           />
           <Image
             src="https://giveaway.hii.link/pattern.avif"
             alt="Pattern overlay"
             width={700}
             height={700}
-            className="absolute -top-36 left-1/6 mix-blend-overlay h-[90vh] w-auto mx-auto"
-            aria-hidden="true"
+            className="absolute -top-36 left-1/2 -translate-x-1/2 mix-blend-overlay h-[90vh] w-auto mx-auto"
           />
+
           <div
-            aria-hidden="true"
+            aria-hidden
             className="bg-linear-to-b to-background absolute inset-0 z-10 from-transparent from-35%"
           />
         </div>

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { apeChain } from "@reown/appkit/networks";
 import { getCsrfToken, getSession, signIn, signOut } from "next-auth/react";

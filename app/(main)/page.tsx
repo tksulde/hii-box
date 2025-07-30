@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Key, Gift, Trophy, Coins } from "lucide-react";
+import { TaskList } from "@/components/task-list";
+import { useSession } from "next-auth/react";
+import { get_request } from "@/services/crud";
 
 interface UserStats {
   keysEarned: number;
@@ -12,8 +16,23 @@ interface UserStats {
 }
 
 export default function Dashboard() {
-  // const { address } = useAccount();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { address } = useAccount();
+  const { data: session } = useSession();
+  console.log("session:", session);
+
+  useEffect(() => {
+    if (!address) {
+      return;
+    }
+
+    async function getUserStats() {
+      const res = await get_request("/user/me");
+      console.log(res.data);
+    }
+
+    getUserStats();
+  }, [address]);
+
   const [userStats, setUserStats] = useState<UserStats>({
     keysEarned: 3,
     boxesOpened: 1,
@@ -86,6 +105,18 @@ export default function Dashboard() {
             </p>
           </CardContent>
         </Card>
+      </div>
+      <div className="w-full ">
+        <TaskList
+          userAddress={address}
+          onTaskComplete={() => {
+            setUserStats((prev) => ({
+              ...prev,
+              keysEarned: prev.keysEarned + 1,
+              completedTasks: prev.completedTasks + 1,
+            }));
+          }}
+        />
       </div>
 
       {/* <div>

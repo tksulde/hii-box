@@ -1,5 +1,5 @@
 // app/(main)/layout.tsx
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import ClientLayout from "./client-layout";
 
 export default async function MainLayout({
@@ -9,12 +9,6 @@ export default async function MainLayout({
 }>) {
   const headersData = await headers();
   const cookiesData = headersData.get("cookie");
-  const cookieStore = await cookies();
-  const token = cookieStore.get("hii_box_token")?.value;
 
-  return (
-    <ClientLayout cookies={cookiesData} token={token}>
-      {children}
-    </ClientLayout>
-  );
+  return <ClientLayout cookies={cookiesData}>{children}</ClientLayout>;
 }

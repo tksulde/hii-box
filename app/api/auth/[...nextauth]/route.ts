@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth from "next-auth";
 import credentialsProvider from "next-auth/providers/credentials";
 import {
-  type SIWESession,
   getChainIdFromMessage,
   getAddressFromMessage,
 } from "@reown/appkit-siwe";
@@ -100,6 +98,8 @@ const providers = [
             body: bodyyy,
           }
         );
+
+        console.log("backendRes:", backendRes);
 
         if (!backendRes.ok) {
           console.error("❌ Backend login failed");
