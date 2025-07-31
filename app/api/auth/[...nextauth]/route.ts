@@ -219,12 +219,20 @@ const handler = NextAuth({
       }
 
       // Return previous token if the access token has not expired yet
-      if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
+      // if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
+      //   return token;
+      // }
+
+      if (Date.now() < (token.accessTokenExpires ?? 0)) {
         return token;
       }
 
-      // Access token has expired, try to refresh it
       console.log("⏰ Access token expired, refreshing...");
+
+      return await refreshAccessToken(token);
+
+      // Access token has expired, try to refresh it
+
       return refreshAccessToken(token);
     },
   },

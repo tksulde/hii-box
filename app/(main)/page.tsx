@@ -7,6 +7,14 @@ import { Key, Gift, Trophy, Coins } from "lucide-react";
 import { TaskList } from "@/components/task-list";
 import { useSession } from "next-auth/react";
 import { get_request } from "@/services/crud";
+import { BoxOpening } from "@/components/box-opening";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RewardHistory } from "@/components/reward-history";
+import {
+  CampaignStats,
+  CampaignStatsComponent,
+} from "@/components/campaign-stats";
 
 interface UserStats {
   keysEarned: number;
@@ -15,41 +23,72 @@ interface UserStats {
   completedTasks: number;
 }
 
+interface Social {
+  id: number;
+  platform: string;
+  created_at: string;
+}
+
 export default function Dashboard() {
   const { address } = useAccount();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isBoxLoading, setIsBoxLoading] = useState(false);
+  const [isSocialLoading, setIsSocialLoading] = useState(false);
 
-  console.log("session:", session);
-
-  useEffect(() => {
-    if (!address) {
-      return;
-    }
-
-    if (status === "loading") {
-      return;
-    }
-
-    if (status === "unauthenticated") {
-      return;
-    }
-
-    async function getUserStats() {
-      const res = await get_request("/user/me");
-      console.log(res.data);
-    }
-
-    getUserStats();
-  }, [address, status]);
-
+  const [socials, setSocials] = useState<Social[]>([]);
+  const [boxStats, setBoxStats] = useState<CampaignStats>({
+    total_boxes: 0,
+    available_boxes: 0,
+    opened_boxes: 0,
+    completion_percentage: 0,
+    next_box_position: 0,
+    reward_distribution: {
+      apecoin: 0,
+      standard_nft: 0,
+    },
+  });
   const [userStats, setUserStats] = useState<UserStats>({
-    keysEarned: 3,
+    keysEarned: 0,
     boxesOpened: 1,
     totalRewards: 50,
     completedTasks: 4,
   });
 
-  // const { data } = useSession();
+  async function userStatsUpdate() {
+    const res = await get_request("/user/me");
+    setUserStats((prev) => ({ ...prev, keysEarned: res.data.key_count }));
+    setIsLoading(false);
+  }
+
+  async function boxStatsUpdate() {
+    const res = await get_request("/stats");
+    setBoxStats(res.data);
+    setIsBoxLoading(false);
+  }
+
+  async function userSocialUpdate() {
+    const res = await get_request("/user/socials");
+    setSocials(res.data);
+    setIsSocialLoading(false);
+  }
+
+  useEffect(() => {
+    setIsLoading(true);
+    setIsBoxLoading(true);
+    setIsSocialLoading(true);
+
+    if (!address || status !== "authenticated") {
+      return;
+    }
+
+    userStatsUpdate();
+    userSocialUpdate();
+  }, [address, status]);
+
+  useEffect(() => {
+    boxStatsUpdate();
+  }, []);
 
   return (
     <div className="w-full">
@@ -58,133 +97,132 @@ export default function Dashboard() {
         <h1>Opening</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-        <Card className="card-shadow border-border/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Keys Available
-            </CardTitle>
-            <Key className="h-4 w-4 text-green-600 " />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{userStats.keysEarned}</div>
-            <p className="text-xs text-muted-foreground mt-1">Ready to use</p>
-          </CardContent>
-        </Card>
+      <CampaignStatsComponent stats={boxStats} loading={isBoxLoading} />
 
-        <Card className="card-shadow border-border/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Boxes Opened
-            </CardTitle>
-            <Gift className="h-4 w-4 text-green-600 " />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{userStats.boxesOpened}</div>
-            <p className="text-xs text-muted-foreground mt-1">Total opened</p>
-          </CardContent>
-        </Card>
-
-        <Card className="card-shadow border-border/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              APE Earned
-            </CardTitle>
-            <Coins className="h-4 w-4 text-green-600 " />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{userStats.totalRewards}</div>
-            <p className="text-xs text-muted-foreground mt-1">Total rewards</p>
-          </CardContent>
-        </Card>
-
-        <Card className="card-shadow border-border/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Progress
-            </CardTitle>
-            <Trophy className="h-4 w-4 text-green-600 " />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              {userStats.completedTasks}/12
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Tasks completed
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="w-full ">
-        <TaskList
-          userAddress={address}
-          onTaskComplete={() => {
-            setUserStats((prev) => ({
-              ...prev,
-              keysEarned: prev.keysEarned + 1,
-              completedTasks: prev.completedTasks + 1,
-            }));
-          }}
-        />
-      </div>
-
-      {/* <div>
-        <Tabs defaultValue="tasks" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 bg-muted/50">
-            <TabsTrigger
-              value="tasks"
-              className="data-[state=active]:bg-background"
-            >
+      {(address || status == "authenticated") && (
+        <Tabs defaultValue="tasks" className="space-y-8 w-full">
+          <TabsList className="border-muted/50 border bg-background w-full h-[48px]">
+            <TabsTrigger value="tasks" className="">
               Tasks & Keys
             </TabsTrigger>
-            <TabsTrigger
-              value="boxes"
-              className="data-[state=active]:bg-background"
-            >
+            <TabsTrigger value="boxes" className="">
               Open Boxes
             </TabsTrigger>
-            <TabsTrigger
-              value="rewards"
-              className="data-[state=active]:bg-background"
-            >
+            <TabsTrigger value="rewards" className="">
               Rewards
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="tasks" className="animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+              <Card className="card-shadow border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Keys Available
+                  </CardTitle>
+                  <Key className="h-4 w-4 text-green-600 " />
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <Skeleton className="w-8 h-9" />
+                  ) : (
+                    <div className="text-3xl font-bold">
+                      {userStats.keysEarned}
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Ready to use
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="card-shadow border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Boxes Opened
+                  </CardTitle>
+                  <Gift className="h-4 w-4 text-green-600 " />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    {userStats.boxesOpened}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Total opened
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="card-shadow border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    APE Earned
+                  </CardTitle>
+                  <Coins className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    {userStats.totalRewards}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Total rewards
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="card-shadow border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Progress
+                  </CardTitle>
+                  <Trophy className="h-4 w-4 text-green-600 " />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    {userStats.completedTasks}/12
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Tasks completed
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
             <TaskList
               userAddress={address}
+              socials={socials}
+              isSocialLoading={isSocialLoading}
               onTaskComplete={() => {
                 setUserStats((prev) => ({
                   ...prev,
                   keysEarned: prev.keysEarned + 1,
                   completedTasks: prev.completedTasks + 1,
                 }));
+                userSocialUpdate();
               }}
             />
           </TabsContent>
 
           <TabsContent value="boxes" className="animate-fade-in">
-            <BoxOpening
-              availableKeys={userStats.keysEarned}
-              onBoxOpened={(reward) => {
-                setUserStats((prev) => ({
-                  ...prev,
-                  keysEarned: prev.keysEarned - 1,
-                  boxesOpened: prev.boxesOpened + 1,
-                  totalRewards:
-                    prev.totalRewards +
-                    (reward.type === "ape" ? reward.amount ?? 0 : 0),
-                }));
-              }}
-            />
+            <div className="max-w-lg w-full mx-auto">
+              <BoxOpening
+                availableKeys={userStats.keysEarned}
+                onBoxOpened={() => {
+                  userStatsUpdate();
+                  boxStatsUpdate();
+                }}
+              />
+            </div>
           </TabsContent>
 
-          <TabsContent value="rewards" className="animate-fade-in">
+          <TabsContent
+            value="rewards"
+            className="animate-fade-in min-h-[50svh]"
+          >
             <RewardHistory userAddress={address} />
           </TabsContent>
         </Tabs>
-      </div> */}
+      )}
     </div>
   );
 }
