@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -13,13 +13,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { post_request } from "@/services/crud";
+import { FaTwitter, FaDiscord, FaTelegramPlane } from "react-icons/fa";
 import {
   CheckCircle,
+  Heart,
+  MessageCircle,
   Circle,
   ExternalLink,
   Twitter,
-  MessageCircle,
-  Heart,
   Key,
 } from "lucide-react";
 
@@ -31,73 +33,85 @@ interface Task {
   reward: number;
   completed: boolean;
   requirements?: any;
+  platform?: string;
   verificationUrl?: string;
 }
 
 interface TaskListProps {
   userAddress?: string;
   onTaskComplete: () => void;
+  socials: { platform: string }[];
+  isSocialLoading: boolean;
 }
 
-export function TaskList({ userAddress, onTaskComplete }: TaskListProps) {
-  const [tasks, setTasks] = useState<Task[]>([]);
+const initialTasks: Task[] = [
+  {
+    id: "1",
+    title: "Hold Bored Ape NFT",
+    description: "Own at least 1 Bored Ape Yacht Club NFT in your wallet",
+    type: "nft",
+    reward: 3,
+    completed: false,
+  },
+  {
+    id: "2",
+    title: "Follow @HiiLink on Twitter",
+    description: "Follow our official Twitter account for updates",
+    type: "social",
+    reward: 1,
+    completed: false,
+    verificationUrl: "https://x.com/hiilink",
+    platform: "twitter",
+  },
+  {
+    id: "3",
+    title: "Join Discord Server",
+    description: "Join the official HiiLink Discord community",
+    type: "social",
+    reward: 1,
+    completed: false,
+    verificationUrl: "https://discord.gg/hiilink",
+    platform: "discord",
+  },
+  {
+    id: "4",
+    title: "Join Telegram Group",
+    description: "Join the HiiLink community on Telegram",
+    type: "social",
+    reward: 1,
+    completed: false,
+    verificationUrl: "https://telegram.me/hiilink",
+    platform: "telegram",
+  },
+];
+
+export function TaskList({
+  userAddress,
+  onTaskComplete,
+  socials,
+  isSocialLoading,
+}: TaskListProps) {
   const [loading, setLoading] = useState<string | null>(null);
 
-  useEffect(() => {
-    setTasks([
-      {
-        id: "1",
-        title: "Hold Bored Ape NFT",
-        description: "Own at least 1 Bored Ape Yacht Club NFT in your wallet",
-        type: "nft",
-        reward: 3,
-        completed: false,
-      },
-      {
-        id: "2",
-        title: "Follow @HiiBox on Twitter",
-        description: "Follow our official Twitter account for updates",
-        type: "social",
-        reward: 1,
-        completed: true,
-        verificationUrl: "https://twitter.com/HiiBox",
-      },
-      {
-        id: "3",
-        title: "Retweet Launch Post",
-        description: "Share our campaign launch announcement",
-        type: "social",
-        reward: 1,
-        completed: true,
-        verificationUrl: "https://twitter.com/HiiBox/status/123456789",
-      },
-      {
-        id: "4",
-        title: "Join Discord Server",
-        description: "Join the official Hii Box Discord community",
-        type: "social",
-        reward: 1,
-        completed: true,
-        verificationUrl: "https://discord.gg/hiibox",
-      },
-      {
-        id: "5",
-        title: "Hold Mutant Ape NFT",
-        description: "Own at least 1 Mutant Ape Yacht Club NFT",
-        type: "nft",
-        reward: 2,
-        completed: false,
-      },
-      {
-        id: "6",
-        title: "Make ApeChain Transaction",
-        description: "Complete at least 1 transaction on ApeChain network",
-        type: "onchain",
-        reward: 2,
-        completed: true,
-      },
-    ]);
-  }, []);
+  const tasks: Task[] = useMemo(() => {
+    return initialTasks.map((task) => ({
+      ...task,
+      completed: socials.some((s) => s.platform === task.platform),
+    }));
+  }, [socials]);
+
+  const handleSocial = async (platform: string): Promise<string> => {
+    const { data } = await post_request("/user/socials", { platform });
+    return data?.message || "Social task verified";
+  };
+
+  const checkNFT = async (): Promise<any> => {
+    const { data, status } = await post_request("/user/nfts/check-nfts", {});
+    return {
+      message: data?.message || data.detail || "NFT ownership verified",
+      status,
+    };
+  };
 
   const handleTaskVerification = async (task: Task) => {
     if (!userAddress) return;
@@ -105,42 +119,62 @@ export function TaskList({ userAddress, onTaskComplete }: TaskListProps) {
     setLoading(task.id);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      let messageRes = "";
 
-      setTasks((prev) =>
-        prev.map((t) => (t.id === task.id ? { ...t, completed: true } : t))
-      );
-      onTaskComplete();
+      if (task.type === "social" && task.platform) {
+        messageRes = await handleSocial(task.platform);
 
-      toast.success("Task completed! 🎉", {
-        description: `You earned ${task.reward} key${
-          task.reward > 1 ? "s" : ""
-        }`,
-        icon: <Key className="h-4 w-4" />,
-        duration: 4000,
-      });
+        toast.success(`${messageRes} 🎉`, {
+          icon: <Key className="h-4 w-4" />,
+        });
+
+        onTaskComplete();
+      } else if (task.type === "nft") {
+        const { message, status } = await checkNFT();
+
+        if (status < 300) {
+          toast.success(`${message} 🎉`, {
+            icon: <Key className="h-4 w-4" />,
+          });
+
+          onTaskComplete();
+        } else {
+          toast.info(`${message}`);
+        }
+      }
     } catch (error) {
       toast.error("Verification failed", {
         description: "Please complete the task requirements first.",
-        duration: 4000,
       });
     } finally {
       setLoading(null);
     }
   };
 
-  const getTaskIcon = (type: string, completed: boolean) => {
-    if (completed) return <CheckCircle className="h-5 w-5 text-green-600" />;
+  const getTaskIcon = (task: Task) => {
+    if (task.completed)
+      return <CheckCircle className="h-5 w-5 text-green-600" />;
 
-    switch (type) {
-      case "social":
-        return <Twitter className="h-5 w-5 text-green-600 " />;
+    if (task.type === "social") {
+      switch (task.platform) {
+        case "twitter":
+          return <FaTwitter className="h-5 w-5 text-blue-500" />;
+        case "discord":
+          return <FaDiscord className="h-5 w-5 text-indigo-500" />;
+        case "telegram":
+          return <FaTelegramPlane className="h-5 w-5 text-sky-500" />;
+        default:
+          return <Circle className="h-5 w-5 text-gray-500" />;
+      }
+    }
+
+    switch (task.type) {
       case "nft":
-        return <Heart className="h-5 w-5 text-green-600" />;
+        return <Heart className="h-5 w-5 text-pink-500" />;
       case "onchain":
-        return <MessageCircle className="h-5 w-5 text-green-600" />;
+        return <MessageCircle className="h-5 w-5 text-orange-500" />;
       default:
-        return <Circle className="h-5 w-5 text-green-600" />;
+        return <Circle className="h-5 w-5 text-gray-500" />;
     }
   };
 
@@ -184,9 +218,7 @@ export function TaskList({ userAddress, onTaskComplete }: TaskListProps) {
             <CardHeader className="pb-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
-                  <div className="mt-1">
-                    {getTaskIcon(task.type, task.completed)}
-                  </div>
+                  <div className="mt-1">{getTaskIcon(task)}</div>
                   <div className="flex-1">
                     <CardTitle className="text-lg font-medium">
                       {task.title}
@@ -200,15 +232,17 @@ export function TaskList({ userAddress, onTaskComplete }: TaskListProps) {
                   <Badge variant="outline" className="text-xs">
                     {task.type.toUpperCase()}
                   </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    {task.reward} Key{task.reward > 1 ? "s" : ""}
-                  </Badge>
+                  {task.type !== "social" && (
+                    <Badge variant="secondary" className="text-xs">
+                      {task.reward} Key{task.reward > 1 ? "s" : ""}
+                    </Badge>
+                  )}
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div>
                   {task.verificationUrl && (
                     <Button
                       variant="outline"
@@ -224,11 +258,13 @@ export function TaskList({ userAddress, onTaskComplete }: TaskListProps) {
                 </div>
                 <Button
                   onClick={() => handleTaskVerification(task)}
-                  disabled={task.completed || loading === task.id}
+                  disabled={
+                    task.completed || loading === task.id || isSocialLoading
+                  }
                   variant={task.completed ? "secondary" : "default"}
                   size="sm"
                 >
-                  {loading === task.id
+                  {loading === task.id || isSocialLoading
                     ? "Verifying..."
                     : task.completed
                     ? "Completed"
