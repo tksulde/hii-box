@@ -6,62 +6,59 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor
 apiClient.interceptors.request.use(
   async (config) => {
     const session = await getSession();
 
-    // Check for refresh token error
     if (session?.error === "RefreshAccessTokenError") {
-      console.error("❌ Session has refresh token error, signing out");
       await signOut({ redirect: true, callbackUrl: "/" });
-      return Promise.reject(new Error("Session expired"));
+      throw new Error("Session expired");
     }
 
     if (session?.accessToken) {
-      config.headers["Authorization"] = `Bearer ${session.accessToken}`;
-    } else {
-      console.warn("⚠️ No access token found in session");
+      config.headers.Authorization = `Bearer ${session.accessToken}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
     if (error.response?.status !== 401 || originalRequest._retry) {
-      return Promise.reject(error);
+      throw error;
     }
 
     originalRequest._retry = true;
 
     try {
-      console.log("🔄 401 error, attempting to refresh session...");
+      const response = await fetch("/api/auth/session", {
+        method: "GET",
+        credentials: "include",
+      });
 
-      // Force NextAuth to refresh the session
-      const session = await getSession();
+      if (!response.ok) {
+        throw new Error("Failed to refresh session");
+      }
+
+      const refreshedSession = await response.json();
 
       if (
-        !session?.accessToken ||
-        session.error === "RefreshAccessTokenError"
+        !refreshedSession?.accessToken ||
+        refreshedSession.error === "RefreshAccessTokenError"
       ) {
         throw new Error("No valid session after refresh");
       }
 
-      // Retry the original request with the new token
-      originalRequest.headers[
-        "Authorization"
-      ] = `Bearer ${session.accessToken}`;
+      originalRequest.headers.Authorization = `Bearer ${refreshedSession.accessToken}`;
       return apiClient(originalRequest);
     } catch (refreshError) {
-      console.error("❌ Failed to refresh session, signing out");
       await signOut({ redirect: true, callbackUrl: "/" });
-      return Promise.reject(refreshError);
+      throw refreshError;
     }
   }
 );

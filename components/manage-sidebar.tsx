@@ -58,27 +58,6 @@ export default function Sidebar() {
       label: "Supported NFTs",
       href: "/manage/dashboard/supported-nfts",
     },
-    {
-      icon: FileUser,
-      label: "User Subscriptions",
-      href: "/manage/dashboard/user-subscriptions",
-    },
-    {
-      icon: ReceiptText,
-      label: "Payments",
-      href: "/manage/dashboard/payments",
-    },
-    {
-      icon: Receipt,
-      label: "Subscription Plans",
-      href: "/manage/dashboard/subscription-plans",
-    },
-    { icon: Logs, label: "Access Log", href: "/manage/dashboard/access-log" },
-    {
-      icon: FileKey,
-      label: "Api Key Log",
-      href: "/manage/dashboard/api-key-log",
-    },
   ];
 
   return (

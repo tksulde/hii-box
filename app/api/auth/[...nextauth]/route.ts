@@ -26,21 +26,27 @@ async function refreshAccessToken(token: JWT) {
         headers: {
           "Content-Type": "application/json",
         },
+        timeout: 10000,
       }
     );
 
     const refreshedTokens = response.data;
-    console.log("✅ Token refreshed successfully");
 
     return {
       ...token,
       accessToken: refreshedTokens.access_token,
-      refreshToken: token.refreshToken, // Keep the same refresh token
-      accessTokenExpires: Date.now() + 15 * 60 * 1000, // 15 minutes
+      refreshToken: token.refreshToken,
+      accessTokenExpires: Date.now() + 14 * 60 * 1000,
       error: undefined,
     };
   } catch (error) {
-    console.error("❌ Error refreshing access token:", error);
+    console.error("Error refreshing access token:", error);
+
+    if (axios.isAxiosError(error)) {
+      console.error("Response status:", error.response?.status);
+      console.error("Response data:", error.response?.data);
+    }
+
     return {
       ...token,
       error: "RefreshAccessTokenError",
@@ -66,7 +72,6 @@ const providers = [
         const address = getAddressFromMessage(message);
         const chainId = getChainIdFromMessage(message);
 
-        // ✅ Signature verification
         const publicClient = createPublicClient({
           transport: http(
             `https://rpc.walletconnect.org/v1/?chainId=${chainId}&projectId=${projectId}`
@@ -80,7 +85,7 @@ const providers = [
         });
 
         if (!isValid) {
-          console.error("❌ Invalid signature");
+          console.error("Invalid signature");
           return null;
         }
 
@@ -99,10 +104,9 @@ const providers = [
           }
         );
 
-        console.log("backendRes:", backendRes);
-
         if (!backendRes.ok) {
-          console.error("❌ Backend login failed");
+          const errorText = await backendRes.text();
+          console.error("Backend login failed:", errorText);
           return null;
         }
 
@@ -152,7 +156,8 @@ const providers = [
         );
 
         if (!backendRes.ok) {
-          console.error("❌ Backend login failed");
+          const errorText = await backendRes.text();
+          console.error("Backend admin login failed:", errorText);
           return null;
         }
 
@@ -182,7 +187,6 @@ const handler = NextAuth({
   session: { strategy: "jwt" },
   callbacks: {
     async session({ session, token }) {
-      // Handle refresh token errors
       if (token.error === "RefreshAccessTokenError") {
         return { ...session, error: "RefreshAccessTokenError" };
       }
@@ -202,29 +206,25 @@ const handler = NextAuth({
       return session;
     },
     async jwt({ token, user }) {
-      // If this is the initial sign in, add user data to token
       if (user?.user) {
         return {
           ...token,
           accessToken: user.user.token,
           refreshToken: user.user.refreshToken,
-          accessTokenExpires: Date.now() + 15 * 60 * 1000,
+          accessTokenExpires: Date.now() + 14 * 60 * 1000,
           user: user.user,
         };
       }
 
-      // If there was an error before, return the error
       if (token.error) {
+        console.log("Token has error:", token.error);
         return token;
       }
 
-      // Return previous token if the access token has not expired yet
       if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
         return token;
       }
 
-      // Access token has expired, try to refresh it
-      console.log("⏰ Access token expired, refreshing...");
       return refreshAccessToken(token);
     },
   },
