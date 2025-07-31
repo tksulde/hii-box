@@ -11,8 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Gift, Key, Sparkles, Coins, Trophy, Star } from "lucide-react";
+import { Gift, Key, Coins, Trophy } from "lucide-react";
 import { post_request } from "@/services/crud";
+import ThreeBoxCanvas from "./box-canvas";
+import confetti from "canvas-confetti";
 
 interface Reward {
   type: "ape" | "nft" | "ticket";
@@ -31,6 +33,8 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
   const [animation, setAnimation] = useState<
     "idle" | "shaking" | "opening" | "revealing"
   >("idle");
+
+  const [rotateSpeed, setRotateSpeed] = useState(1);
 
   const REWARDS: Reward[] = [
     {
@@ -79,28 +83,34 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
     }
 
     const toastId = `box-opening-${Date.now()}`;
-
     toast.loading("Opening your box...", {
       id: toastId,
       icon: <Gift className="h-4 w-4" />,
     });
 
-    setAnimation("shaking");
-    await new Promise((r) => setTimeout(r, 1000));
-    setAnimation("opening");
-
     try {
-      const { data } = await post_request("/open", {}); // 🔥 CALL YOUR API
-      const reward = data.box;
+      setAnimation("shaking");
+      await new Promise((r) => setTimeout(r, 500));
+      setAnimation("opening");
+      setRotateSpeed(10);
 
+      const { data } = await post_request("/boxes/open", {});
+      const reward: Reward = data.box || REWARDS[0]; // fallback in dev mode
+
+      await new Promise((r) => setTimeout(r, 1500));
       setAnimation("revealing");
       onBoxOpened(reward);
 
-      await new Promise((r) => setTimeout(r, 1500));
-      setAnimation("idle");
+      // 🎉 Confetti after reveal
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+      });
 
+      await new Promise((r) => setTimeout(r, 1000));
       toast.dismiss(toastId);
-      toast.success(`${data.message}`, {
+      toast.success(`${data.message || `You got ${reward.name}!`}`, {
         icon:
           reward.type === "ape" ? (
             <Coins className="h-4 w-4" />
@@ -109,11 +119,13 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
           ),
       });
     } catch (err) {
-      setAnimation("idle");
       toast.dismiss(toastId);
       toast.error("Box opening failed", {
         description: "Please try again later.",
       });
+    } finally {
+      setAnimation("idle");
+      setRotateSpeed(1);
     }
   };
 
@@ -122,15 +134,14 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
       <Card className="card-shadow border-border/50 transition-all duration-300">
         <CardHeader>
           <div
-            className={`h-36 bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-lg flex items-center justify-center ${
+            className={`h-64 bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-lg flex items-center justify-center ${
               animation !== "idle" ? "animate-pulse" : ""
             }`}
           >
-            {animation === "opening" ? (
-              <Sparkles className="h-16 w-16 text-white animate-spin" />
-            ) : (
-              <Gift className="h-16 w-16 text-white" />
-            )}
+            <ThreeBoxCanvas
+              isOpening={animation === "opening"}
+              rotateSpeed={rotateSpeed}
+            />
           </div>
           <CardTitle className="text-lg mt-4">Hii Mystery Box</CardTitle>
           <CardDescription>

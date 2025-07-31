@@ -6,14 +6,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Package, Gift, Coins, TrendingUp, Users, Target } from "lucide-react";
+import { Package, Gift, Coins, TrendingUp, Users } from "lucide-react";
 
 export interface CampaignStats {
   total_boxes: number;
   available_boxes: number;
   opened_boxes: number;
-  completion_percentage: number;
+  opening_percentage: number;
   next_box_position: number;
   reward_distribution: {
     apecoin: number;
@@ -31,7 +30,7 @@ export function CampaignStatsComponent({
 }) {
   if (loading) {
     return (
-      <div>
+      <div className="w-2/3 ">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {[1, 2, 3].map((i) => (
             <Card
@@ -104,8 +103,7 @@ export function CampaignStatsComponent({
   };
 
   return (
-    <div className="space-y-8 mb-12">
-      {/* Main Campaign Stats */}
+    <div className="space-y-8 mb-12 w-2/3 ">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="card-shadow border-border/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -153,7 +151,6 @@ export function CampaignStatsComponent({
         </Card>
       </div>
 
-      {/* Progress and Next Box */}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
         <Card className="card-shadow border-border/50">
           <CardHeader>
@@ -168,13 +165,10 @@ export function CampaignStatsComponent({
               <div className="flex justify-between text-sm">
                 <span>Completion</span>
                 <span className="font-medium">
-                  {(stats.completion_percentage * 100).toFixed(2)}%
+                  {stats.opening_percentage.toFixed(2)}%
                 </span>
               </div>
-              <Progress
-                value={stats.completion_percentage * 100}
-                className="h-2"
-              />
+              <Progress value={stats.opening_percentage} className="h-2" />
             </div>
             <div className="text-xs text-muted-foreground">
               {formatNumber(stats.opened_boxes)} of{" "}
@@ -202,55 +196,6 @@ export function CampaignStatsComponent({
           </CardContent>
         </Card> */}
       </div>
-
-      {/* Reward Distribution */}
-      {/* <Card className="card-shadow border-border/50">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">
-            Reward Distribution
-          </CardTitle>
-          <CardDescription>
-            Breakdown of rewards given out so far
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Object.entries(stats?.reward_distribution).map(([type, count]) => (
-              <div
-                key={type}
-                className="flex items-center space-x-3 p-3 bg-muted/20 rounded-lg"
-              >
-                <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
-                  {getRewardTypeIcon(type)}
-                </div>
-                <div>
-                  <p className="text-sm font-medium">
-                    {getRewardTypeLabel(type)}
-                  </p>
-                  <p className="text-2xl font-bold">{formatNumber(count)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-border">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">
-                Total Rewards Distributed
-              </span>
-              <Badge variant="secondary" className="text-sm">
-                {formatNumber(
-                  Object.values(stats.reward_distribution).reduce(
-                    (sum, count) => sum + count,
-                    0
-                  )
-                )}{" "}
-                rewards
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card> */}
     </div>
   );
 }

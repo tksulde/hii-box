@@ -228,6 +228,10 @@ const handler = NextAuth({
       return refreshAccessToken(token);
     },
   },
+  pages: {
+    signIn: "/manage",
+    error: "/manage",
+  },
 });
 
 export { handler as GET, handler as POST };

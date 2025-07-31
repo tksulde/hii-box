@@ -15,6 +15,7 @@ import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 const loginSchema = z.object({
   username: z.string().min(1, { message: "Username is required" }),
@@ -37,12 +38,22 @@ export function LoginForm({
 
   const onSubmit = async (data: LoginFormData) => {
     console.log("Login button clicked", data);
-    await signIn("admin-login", {
+    const res = await signIn("admin-login", {
       username: data.username,
       password: data.password,
       callbackUrl: "/manage/dashboard",
-      redirect: true,
+      redirect: false,
     });
+
+    if (res?.error) {
+      console.error("Login failed:", res.error);
+      toast.error("Invalid credentials"); // or show it in the UI
+    }
+
+    if (res?.ok) {
+      console.log("Login successful, redirecting...");
+      window.location.href = res.url || "/manage/dashboard";
+    }
   };
 
   return (

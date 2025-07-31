@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Trophy, Coins, Gift, Calendar, ExternalLink } from "lucide-react";
+import { MyBox } from "@/app/(main)/page"; // <-- Make sure this matches your backend structure
 
 interface RewardEntry {
   id: string;
@@ -23,48 +24,78 @@ interface RewardEntry {
 }
 
 interface RewardHistoryProps {
-  userAddress?: string;
+  myBoxes: MyBox[];
 }
 
-export function RewardHistory({ userAddress }: RewardHistoryProps) {
+const mapTierToRarity = (tier: string): RewardEntry["rarity"] => {
+  switch (tier) {
+    case "tier1":
+      return "common";
+    case "tier2":
+      return "rare";
+    case "tier3":
+      return "epic";
+    case "tier4":
+      return "legendary";
+    default:
+      return "common";
+  }
+};
+
+export function RewardHistory({ myBoxes }: RewardHistoryProps) {
   const [rewards, setRewards] = useState<RewardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const mockRewards: RewardEntry[] = [
-      {
-        id: "1",
-        type: "ape",
-        name: "50 APE Reward",
-        amount: 50,
-        rarity: "rare",
-        timestamp: new Date(Date.now() - 86400000),
-        txHash: "0x1234...5678",
-      },
-      {
-        id: "2",
-        type: "nft",
-        name: "Silver Collector NFT",
-        rarity: "rare",
-        timestamp: new Date(Date.now() - 172800000),
-        txHash: "0x2345...6789",
-      },
-      {
-        id: "3",
-        type: "ape",
-        name: "25 APE Reward",
-        amount: 25,
-        rarity: "common",
-        timestamp: new Date(Date.now() - 259200000),
-        txHash: "0x3456...7890",
-      },
-    ];
+    if (!myBoxes || myBoxes.length === 0) return;
 
-    setTimeout(() => {
-      setRewards(mockRewards);
-      setLoading(false);
-    }, 1000);
-  }, [userAddress]);
+    const parsed: RewardEntry[] = myBoxes
+      .filter((b) => b.status === "opened")
+      .map((box) => {
+        let type: RewardEntry["type"] = "common";
+        let rarity: RewardEntry["rarity"] = "common";
+        const name = box.reward_description ?? "Mystery Reward";
+
+        // 🎯 Type logic
+        if (box.reward_type?.includes("apecoin")) {
+          type = "ape";
+        } else if (box.reward_type?.includes("nft")) {
+          type = "nft";
+        } else if (box.reward_type?.includes("ticket")) {
+          type = "ticket";
+        }
+
+        // 🧠 Rarity logic
+        if (box.reward_tier) {
+          rarity = mapTierToRarity(box.reward_tier);
+        } else if (box.reward_type?.includes("rare")) {
+          rarity = "rare";
+        } else if (box.reward_type?.includes("epic")) {
+          rarity = "epic";
+        } else if (box.reward_type?.includes("legendary")) {
+          rarity = "legendary";
+        }
+
+        // 💰 APE logic
+        const amount =
+          type === "ape" && box.reward_data?.amount
+            ? Number(box.reward_data.amount)
+            : undefined;
+
+        return {
+          id: String(box.id),
+          type,
+          name,
+          rarity,
+          amount,
+          timestamp: new Date(box.opened_at),
+          txHash: box.txHash,
+        };
+      });
+
+    setRewards(parsed);
+    setLoading(false);
+  }, [myBoxes]);
 
   const getRarityBadge = (rarity: string) => {
     switch (rarity) {
@@ -75,7 +106,6 @@ export function RewardHistory({ userAddress }: RewardHistoryProps) {
       case "rare":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       case "common":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
@@ -118,7 +148,7 @@ export function RewardHistory({ userAddress }: RewardHistoryProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{totalApeEarned}</div>
+            <div className="text-3xl font-bold">{totalApeEarned} APE</div>
           </CardContent>
         </Card>
 
@@ -161,7 +191,7 @@ export function RewardHistory({ userAddress }: RewardHistoryProps) {
               <Gift className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-lg font-medium mb-2">No rewards yet</p>
               <p className="text-muted-foreground">
-                Complete tasks and open boxes to start earning rewards
+                Open boxes to start earning real rewards.
               </p>
             </div>
           ) : (

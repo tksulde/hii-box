@@ -15,6 +15,7 @@ import {
   CampaignStats,
   CampaignStatsComponent,
 } from "@/components/campaign-stats";
+import ThreeBoxCanvasHero from "@/components/box-canvas-hero";
 
 interface UserStats {
   keysEarned: number;
@@ -29,6 +30,38 @@ interface Social {
   created_at: string;
 }
 
+export interface MyBox {
+  id: number;
+  reward_type: string;
+  reward_description: string;
+  reward_data: {
+    amount?: number;
+    currency?: string;
+    tier?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+  };
+  reward_tier?: string;
+  opened_at: string;
+  status: string;
+  txHash?: string;
+}
+
+interface Boxes {
+  user: {
+    id: number;
+    total_boxes_opened: number;
+    wallet_address: string;
+  };
+  boxes: MyBox[];
+  pagination: {
+    has_more: boolean;
+    limit: number;
+    offset: number;
+    total: number;
+  };
+}
+
 export default function Dashboard() {
   const { address } = useAccount();
   const { status } = useSession();
@@ -41,7 +74,7 @@ export default function Dashboard() {
     total_boxes: 0,
     available_boxes: 0,
     opened_boxes: 0,
-    completion_percentage: 0,
+    opening_percentage: 0,
     next_box_position: 0,
     reward_distribution: {
       apecoin: 0,
@@ -54,6 +87,20 @@ export default function Dashboard() {
     totalRewards: 50,
     completedTasks: 4,
   });
+  const [myBoxes, setMyBoxes] = useState<Boxes>({
+    user: {
+      id: 0,
+      total_boxes_opened: 0,
+      wallet_address: "",
+    },
+    boxes: [],
+    pagination: {
+      has_more: false,
+      limit: 0,
+      offset: 0,
+      total: 0,
+    },
+  });
 
   async function userStatsUpdate() {
     const res = await get_request("/user/me");
@@ -62,8 +109,14 @@ export default function Dashboard() {
   }
 
   async function boxStatsUpdate() {
-    const res = await get_request("/stats");
+    const res = await get_request("/boxes/stats");
     setBoxStats(res.data);
+    setIsBoxLoading(false);
+  }
+
+  async function myBoxUpdate() {
+    const res = await get_request("/boxes/my-opened");
+    setMyBoxes(res.data);
     setIsBoxLoading(false);
   }
 
@@ -84,20 +137,26 @@ export default function Dashboard() {
 
     userStatsUpdate();
     userSocialUpdate();
+    myBoxUpdate();
   }, [address, status]);
 
-  // useEffect(() => {
-  //   boxStatsUpdate();
-  // }, []);
+  useEffect(() => {
+    boxStatsUpdate();
+  }, []);
 
   return (
     <div className="w-full">
-      <div className="py-30 flex flex-col items-center justify-center text-center text-8xl font-bold tracking-tight mb-2">
+      <div className="py-30 flex flex-col items-center justify-center text-center text-6xl md:text-8xl font-bold tracking-tight ">
         <h1>Hii Box</h1>
         <h1>Opening</h1>
       </div>
 
-      <CampaignStatsComponent stats={boxStats} loading={isBoxLoading} />
+      <div className="flex justify-between gap-12">
+        <CampaignStatsComponent stats={boxStats} loading={isBoxLoading} />
+        <div className="max-w-3xl mx-auto">
+          <ThreeBoxCanvasHero />
+        </div>
+      </div>
 
       {(address || status == "authenticated") && (
         <Tabs defaultValue="tasks" className="space-y-8 w-full">
@@ -210,6 +269,7 @@ export default function Dashboard() {
                 onBoxOpened={() => {
                   userStatsUpdate();
                   boxStatsUpdate();
+                  myBoxUpdate();
                 }}
               />
             </div>
@@ -219,7 +279,7 @@ export default function Dashboard() {
             value="rewards"
             className="animate-fade-in min-h-[50svh]"
           >
-            <RewardHistory userAddress={address} />
+            <RewardHistory myBoxes={myBoxes.boxes} />
           </TabsContent>
         </Tabs>
       )}
