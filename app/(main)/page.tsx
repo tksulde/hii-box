@@ -86,9 +86,9 @@ export default function Dashboard() {
     userSocialUpdate();
   }, [address, status]);
 
-  useEffect(() => {
-    boxStatsUpdate();
-  }, []);
+  // useEffect(() => {
+  //   boxStatsUpdate();
+  // }, []);
 
   return (
     <div className="w-full">
