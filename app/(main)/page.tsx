@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Key, Gift, Trophy, Coins } from "lucide-react";
+import { Key, Gift } from "lucide-react";
 import { TaskList } from "@/components/task-list";
 import { useSession } from "next-auth/react";
 import { get_request } from "@/services/crud";
@@ -114,10 +114,17 @@ export default function Dashboard() {
     setIsBoxLoading(false);
   }
 
-  async function myBoxUpdate() {
+  async function myBoxOpenedUpdate() {
     const res = await get_request("/boxes/my-opened");
     setMyBoxes(res.data);
     setIsBoxLoading(false);
+  }
+
+  async function myBoxUpdate() {
+    const res = await get_request("/boxes/my-boxes");
+    console.log(res.data);
+    // setMyBoxes(res.data);
+    // setIsBoxLoading(false);
   }
 
   async function userSocialUpdate() {
@@ -137,6 +144,7 @@ export default function Dashboard() {
 
     userStatsUpdate();
     userSocialUpdate();
+    myBoxOpenedUpdate();
     myBoxUpdate();
   }, [address, status]);
 
@@ -158,7 +166,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {(address || status == "authenticated") && (
+      {address && status == "authenticated" && (
         <Tabs defaultValue="tasks" className="space-y-8 w-full">
           <TabsList className="border-muted/50 border bg-background w-full h-[48px]">
             <TabsTrigger value="tasks" className="">
@@ -173,7 +181,7 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="tasks" className="animate-fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
               <Card className="card-shadow border-border/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -211,40 +219,6 @@ export default function Dashboard() {
                   </p>
                 </CardContent>
               </Card>
-
-              <Card className="card-shadow border-border/50">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    APE Earned
-                  </CardTitle>
-                  <Coins className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">
-                    {userStats.totalRewards}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Total rewards
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="card-shadow border-border/50">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Progress
-                  </CardTitle>
-                  <Trophy className="h-4 w-4 text-green-600 " />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">
-                    {userStats.completedTasks}/12
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Tasks completed
-                  </p>
-                </CardContent>
-              </Card>
             </div>
 
             <TaskList
@@ -269,7 +243,7 @@ export default function Dashboard() {
                 onBoxOpened={() => {
                   userStatsUpdate();
                   boxStatsUpdate();
-                  myBoxUpdate();
+                  myBoxOpenedUpdate();
                 }}
               />
             </div>

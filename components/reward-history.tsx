@@ -195,8 +195,8 @@ export function RewardHistory({ myBoxes }: RewardHistoryProps) {
               </p>
             </div>
           ) : (
-            <ScrollArea className="h-96">
-              <div className="space-y-4">
+            <ScrollArea className="h-96 border rounded-xl">
+              <div className="space-y-4 p-4">
                 {rewards.map((reward) => (
                   <div
                     key={reward.id}

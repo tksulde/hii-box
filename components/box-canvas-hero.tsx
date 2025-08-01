@@ -15,7 +15,7 @@ export default function ThreeBoxCanvasHero() {
       <Canvas camera={{ position: [0, 1.5, 5], fov: 45 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
-        <Suspense fallback={<Html>Loading...</Html>}>
+        <Suspense fallback={<Html>...</Html>}>
           <BoxModel />
           <Environment preset="sunset" />
         </Suspense>

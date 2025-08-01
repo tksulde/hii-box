@@ -82,51 +82,49 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
       return;
     }
 
-    const toastId = `box-opening-${Date.now()}`;
-    toast.loading("Opening your box...", {
-      id: toastId,
-      icon: <Gift className="h-4 w-4" />,
-    });
+    setAnimation("shaking");
+    await new Promise((r) => setTimeout(r, 500));
+    setAnimation("opening");
+    setRotateSpeed(10);
 
-    try {
-      setAnimation("shaking");
-      await new Promise((r) => setTimeout(r, 500));
-      setAnimation("opening");
-      setRotateSpeed(10);
+    toast.promise(
+      async () => {
+        const { data, status } = await post_request("/boxes/open", {
+          box_position: 69,
+        });
 
-      const { data } = await post_request("/boxes/open", {});
-      const reward: Reward = data.box || REWARDS[0]; // fallback in dev mode
+        if (status > 300) {
+          throw new Error(data.detail ?? "Box opening failed");
+        }
 
-      await new Promise((r) => setTimeout(r, 1500));
-      setAnimation("revealing");
-      onBoxOpened(reward);
+        const reward: Reward = data.box || REWARDS[0];
 
-      // 🎉 Confetti after reveal
-      confetti({
-        particleCount: 150,
-        spread: 80,
-        origin: { y: 0.6 },
-      });
+        await new Promise((r) => setTimeout(r, 500));
+        setAnimation("revealing");
+        onBoxOpened(reward);
 
-      await new Promise((r) => setTimeout(r, 1000));
-      toast.dismiss(toastId);
-      toast.success(`${data.message || `You got ${reward.name}!`}`, {
-        icon:
-          reward.type === "ape" ? (
-            <Coins className="h-4 w-4" />
-          ) : (
-            <Trophy className="h-4 w-4" />
-          ),
-      });
-    } catch (err) {
-      toast.dismiss(toastId);
-      toast.error("Box opening failed", {
-        description: "Please try again later.",
-      });
-    } finally {
-      setAnimation("idle");
-      setRotateSpeed(1);
-    }
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+        });
+
+        await new Promise((r) => setTimeout(r, 1000));
+
+        return reward;
+      },
+      {
+        loading: "Opening your box...",
+        success: (reward) => {
+          return `You received: ${reward.name}`;
+        },
+        error: (err) => `${err.message ?? "Box opening failed"}`,
+      }
+    );
+
+    await new Promise((r) => setTimeout(r, 2000));
+    setAnimation("idle");
+    setRotateSpeed(1);
   };
 
   return (

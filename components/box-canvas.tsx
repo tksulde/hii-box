@@ -32,7 +32,7 @@ export default function ThreeBoxCanvas({
       <Canvas camera={{ position: [0, 1.5, 5], fov: 45 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 10, 5]} intensity={2} />
-        <Suspense fallback={<Html>Loading...</Html>}>
+        <Suspense fallback={<Html>...</Html>}>
           <BoxModel isOpening={isOpening} />
           <Environment preset="sunset" />
         </Suspense>
