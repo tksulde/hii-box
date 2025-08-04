@@ -7,7 +7,7 @@ import genAddresses from "./genAddress.json";
 import hiiboxABI from "../abi/HIIBOX.json";
 
 // Type the ABI if needed (optional)
-const tournamentFactory: string = genAddresses.hiibox;
+const hiibox: string = genAddresses.hiibox;
 
 export async function getHIIBOXContract(): Promise<{
   hiiboxReadContract: ethers.Contract;
@@ -17,11 +17,7 @@ export async function getHIIBOXContract(): Promise<{
 
   const hiiboxAbi2 = hiiboxABI as any;
 
-  const hiiboxReadContract = new ethers.Contract(
-    tournamentFactory,
-    hiiboxAbi2,
-    provider
-  );
+  const hiiboxReadContract = new ethers.Contract(hiibox, hiiboxAbi2, provider);
 
   const hiiboxWriteContract = hiiboxReadContract.connect(await signer);
 

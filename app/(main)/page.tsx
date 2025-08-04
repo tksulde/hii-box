@@ -159,7 +159,7 @@ export default function Dashboard() {
         <h1>Opening</h1>
       </div>
 
-      <div className="flex justify-between gap-12">
+      <div className="flex flex-col-reverse md:flex-row justify-between gap-12">
         <CampaignStatsComponent stats={boxStats} loading={isBoxLoading} />
         <div className="max-w-3xl mx-auto">
           <ThreeBoxCanvasHero />

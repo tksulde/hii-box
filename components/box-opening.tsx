@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -15,7 +15,8 @@ import { Gift, Key, Coins, Trophy } from "lucide-react";
 import { post_request } from "@/services/crud";
 import ThreeBoxCanvas from "./box-canvas";
 import confetti from "canvas-confetti";
-
+import { getHIIBOXContract } from "../lib/HIIBOXContractHelper";
+import { useAccount } from "wagmi";
 interface Reward {
   type: "ape" | "nft" | "ticket";
   name: string;
@@ -33,6 +34,8 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
   const [animation, setAnimation] = useState<
     "idle" | "shaking" | "opening" | "revealing"
   >("idle");
+
+  const { address } = useAccount();
 
   const [rotateSpeed, setRotateSpeed] = useState(1);
 
@@ -126,6 +129,15 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
     setAnimation("idle");
     setRotateSpeed(1);
   };
+
+  useEffect(() => {
+    const getBoxes = async () => {
+      const { hiiboxReadContract } = await getHIIBOXContract();
+      const balance = await hiiboxReadContract.balanceOf(address);
+      console.log("balance ->", balance);
+    };
+    getBoxes();
+  }, [address]);
 
   return (
     <div className="space-y-6">

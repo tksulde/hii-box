@@ -30,7 +30,7 @@ export function CampaignStatsComponent({
 }) {
   if (loading) {
     return (
-      <div className="w-2/3 ">
+      <div className="md:w-2/3 w-full">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {[1, 2, 3].map((i) => (
             <Card
@@ -44,19 +44,7 @@ export function CampaignStatsComponent({
             </Card>
           ))}
         </div>
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {[1, 2].map((i) => (
-            <Card
-              key={i}
-              className="card-shadow border-border/50 animate-pulse"
-            >
-              <CardContent className="p-8">
-                <div className="h-4 bg-muted rounded w-1/2 mb-2" />
-                <div className="h-8 bg-muted rounded w-3/4" />
-              </CardContent>
-            </Card>
-          ))}
-        </div> */}
+
         <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
           {[1].map((i) => (
             <Card
@@ -80,30 +68,8 @@ export function CampaignStatsComponent({
     return new Intl.NumberFormat().format(num);
   };
 
-  const getRewardTypeIcon = (type: string) => {
-    switch (type) {
-      case "apecoin":
-        return <Coins className="h-4 w-4" />;
-      case "standard_nft":
-        return <Gift className="h-4 w-4" />;
-      default:
-        return <Package className="h-4 w-4" />;
-    }
-  };
-
-  const getRewardTypeLabel = (type: string) => {
-    switch (type) {
-      case "apecoin":
-        return "APE Rewards";
-      case "standard_nft":
-        return "NFT Rewards";
-      default:
-        return type.replace("_", " ").toUpperCase();
-    }
-  };
-
   return (
-    <div className="space-y-8 mb-12 w-2/3 ">
+    <div className="space-y-8 mb-12 w-full md:w-2/3 ">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="card-shadow border-border/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

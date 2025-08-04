@@ -4,16 +4,17 @@
 import { useMemo, useState } from "react";
 import {
   Card,
-  CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardContent,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { post_request } from "@/services/crud";
+import { TwitterTaskDialog } from "@/components/twitter-handle-dialog";
 import { FaTwitter, FaDiscord, FaTelegramPlane } from "react-icons/fa";
 import {
   CheckCircle,
@@ -21,7 +22,6 @@ import {
   MessageCircle,
   Circle,
   ExternalLink,
-  Twitter,
   Key,
 } from "lucide-react";
 
@@ -92,6 +92,8 @@ export function TaskList({
   isSocialLoading,
 }: TaskListProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [showTwitterDialog, setShowTwitterDialog] = useState(false);
+  const [twitterTask, setTwitterTask] = useState<Task | null>(null);
 
   const tasks: Task[] = useMemo(() => {
     return initialTasks.map((task) => ({
@@ -113,21 +115,17 @@ export function TaskList({
     };
   };
 
-  const handleTaskVerification = async (task: Task) => {
+  const handleTaskVerification = async (task: Task, username?: string) => {
     if (!userAddress) return;
 
     setLoading(task.id);
 
     try {
-      let messageRes = "";
-
       if (task.type === "social" && task.platform) {
-        messageRes = await handleSocial(task.platform);
-
-        toast.success(`${messageRes} 🎉`, {
+        await handleSocial(task.platform);
+        toast.success(`Twitter task verified 🎉`, {
           icon: <Key className="h-4 w-4" />,
         });
-
         onTaskComplete();
       } else if (task.type === "nft") {
         const { message, status } = await checkNFT();
@@ -136,7 +134,6 @@ export function TaskList({
           toast.success(`${message} 🎉`, {
             icon: <Key className="h-4 w-4" />,
           });
-
           onTaskComplete();
         } else {
           toast.info(`${message}`);
@@ -180,6 +177,15 @@ export function TaskList({
 
   const completedTasks = tasks.filter((t) => t.completed).length;
   const totalTasks = tasks.length;
+
+  const handleVerifyClick = (task: Task) => {
+    if (task.platform === "twitter") {
+      setTwitterTask(task);
+      setShowTwitterDialog(true);
+    } else {
+      handleTaskVerification(task);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -232,11 +238,6 @@ export function TaskList({
                   <Badge variant="outline" className="text-xs">
                     {task.type.toUpperCase()}
                   </Badge>
-                  {task.type !== "social" && (
-                    <Badge variant="secondary" className="text-xs">
-                      {task.reward} Key{task.reward > 1 ? "s" : ""}
-                    </Badge>
-                  )}
                 </div>
               </div>
             </CardHeader>
@@ -257,7 +258,7 @@ export function TaskList({
                   )}
                 </div>
                 <Button
-                  onClick={() => handleTaskVerification(task)}
+                  onClick={() => handleVerifyClick(task)}
                   disabled={
                     task.completed || loading === task.id || isSocialLoading
                   }
@@ -275,6 +276,18 @@ export function TaskList({
           </Card>
         ))}
       </div>
+
+      {twitterTask && (
+        <TwitterTaskDialog
+          open={showTwitterDialog}
+          verificationUrl={twitterTask.verificationUrl ?? ""}
+          onClose={() => setShowTwitterDialog(false)}
+          onVerify={async (username: string) => {
+            await handleTaskVerification(twitterTask, username);
+            setShowTwitterDialog(false);
+          }}
+        />
+      )}
     </div>
   );
 }
