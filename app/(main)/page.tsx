@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -16,6 +17,11 @@ import {
   CampaignStatsComponent,
 } from "@/components/campaign-stats";
 import ThreeBoxCanvasHero from "@/components/box-canvas-hero";
+import { getHIIBOXContract } from "@/lib/HIIBOXContractHelper";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import GradientText from "@/components/gradient-text";
 
 interface UserStats {
   keysEarned: number;
@@ -38,7 +44,6 @@ export interface MyBox {
     amount?: number;
     currency?: string;
     tier?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
   reward_tier?: string;
@@ -67,7 +72,9 @@ export default function Dashboard() {
   const { status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [isBoxLoading, setIsBoxLoading] = useState(false);
+  const [isMyBoxLoading, setIsMyBoxLoading] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState(false);
+  const [isBurning, setIsBurning] = useState<string>("");
 
   const [socials, setSocials] = useState<Social[]>([]);
   const [boxStats, setBoxStats] = useState<CampaignStats>({
@@ -102,6 +109,8 @@ export default function Dashboard() {
     },
   });
 
+  const [notBurnedBoxes, setNotBurnedBoxes] = useState<Array<string>>([]);
+
   async function userStatsUpdate() {
     const res = await get_request("/user/me");
     setUserStats((prev) => ({ ...prev, keysEarned: res.data.key_count }));
@@ -115,22 +124,57 @@ export default function Dashboard() {
   }
 
   async function myBoxOpenedUpdate() {
-    const res = await get_request("/boxes/my-opened");
+    const res = await get_request("/boxes/my-owned");
     setMyBoxes(res.data);
     setIsBoxLoading(false);
-  }
-
-  async function myBoxUpdate() {
-    const res = await get_request("/boxes/my-boxes");
-    console.log(res.data);
-    // setMyBoxes(res.data);
-    // setIsBoxLoading(false);
   }
 
   async function userSocialUpdate() {
     const res = await get_request("/user/socials");
     setSocials(res.data);
     setIsSocialLoading(false);
+  }
+
+  async function getBoxes() {
+    setIsMyBoxLoading(true);
+
+    const { hiiboxReadContract } = await getHIIBOXContract();
+    const balanceBN = await hiiboxReadContract.balanceOf(address ?? "");
+    const balance = Number(balanceBN);
+
+    const boxIds: string[] = [];
+
+    for (let i = 0; i < balance; i++) {
+      const tokenId = await hiiboxReadContract.tokenOfOwnerByIndex(address, i);
+      boxIds.push(tokenId.toString()); // cast BigNumber to string
+    }
+
+    setNotBurnedBoxes(boxIds);
+
+    setIsMyBoxLoading(false);
+  }
+
+  async function burnBox(boxId: string) {
+    setIsBurning(boxId);
+
+    try {
+      const { hiiboxWriteContract } = await getHIIBOXContract();
+      const tx = await hiiboxWriteContract.safeTransferFrom(
+        address,
+        "0xC7a6939038234CBc7ab2D26e7a593785e522E12c",
+        boxId
+      );
+      console.log(tx.hash);
+      toast.success("Box deposited successfully", {
+        icon: <Key className="h-4 w-4" />,
+      });
+    } catch (e) {
+      toast.error("Box deposited failed.", {
+        icon: <Key className="h-4 w-4" />,
+      });
+    }
+    setIsBurning("");
+    setTimeout(() => getBoxes(), 500);
   }
 
   useEffect(() => {
@@ -142,10 +186,12 @@ export default function Dashboard() {
       return;
     }
 
+    getBoxes();
+
     userStatsUpdate();
     userSocialUpdate();
     myBoxOpenedUpdate();
-    myBoxUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, status]);
 
   useEffect(() => {
@@ -219,6 +265,60 @@ export default function Dashboard() {
                   </p>
                 </CardContent>
               </Card>
+            </div>
+
+            <div className="my-6 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {isMyBoxLoading
+                  ? [1, 2, 3].map((index) => (
+                      <Skeleton key={index} className="w-[318px] h-[158px]" />
+                    ))
+                  : notBurnedBoxes.map((boxId, index) => (
+                      <Card
+                        key={index}
+                        className={`card-shadow border-border/50 transition-colors card-shadow`}
+                      >
+                        <CardContent className="flex items-center justify-between gap-6">
+                          <div className="relative overflow-hidden rounded-lg aspect-[3/3]">
+                            <Image
+                              src="/hii-box.avif" // ← replace with your actual box image path
+                              alt={`Box ${boxId}`}
+                              className="object-cover w-full h-full "
+                              width={400}
+                              height={400}
+                            />
+                          </div>
+                          <div className="flex flex-col w-full justify-center items-center">
+                            <div className="text-lg font-bold text-center">
+                              <GradientText
+                                colors={[
+                                  "#40ffaa",
+                                  "#4079ff",
+                                  "#40ffaa",
+                                  "#4079ff",
+                                  "#40ffaa",
+                                ]}
+                                animationSpeed={5}
+                                showBorder={false}
+                                className="rounded-xs"
+                              >
+                                HII BOX #{boxId}
+                              </GradientText>
+                            </div>
+                            <Button
+                              className="mt-2 w-full"
+                              onClick={() => burnBox(boxId)}
+                              disabled={isBurning === boxId}
+                            >
+                              {isBurning === boxId
+                                ? "Depositing..."
+                                : "Deposit"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+              </div>
             </div>
 
             <TaskList

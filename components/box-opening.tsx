@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -11,12 +11,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Gift, Key, Coins, Trophy } from "lucide-react";
+import { Key } from "lucide-react";
 import { post_request } from "@/services/crud";
 import ThreeBoxCanvas from "./box-canvas";
 import confetti from "canvas-confetti";
-import { getHIIBOXContract } from "../lib/HIIBOXContractHelper";
-import { useAccount } from "wagmi";
+import { Skeleton } from "./ui/skeleton";
 interface Reward {
   type: "ape" | "nft" | "ticket";
   name: string;
@@ -35,7 +34,9 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
     "idle" | "shaking" | "opening" | "revealing"
   >("idle");
 
-  const { address } = useAccount();
+  // const { address } = useAccount();
+  const [isLoading, setIsLoading] = useState(false);
+  const [boxBalance, setBoxBalance] = useState(0);
 
   const [rotateSpeed, setRotateSpeed] = useState(1);
 
@@ -130,14 +131,28 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
     setRotateSpeed(1);
   };
 
-  useEffect(() => {
-    const getBoxes = async () => {
-      const { hiiboxReadContract } = await getHIIBOXContract();
-      const balance = await hiiboxReadContract.balanceOf(address);
-      console.log("balance ->", balance);
-    };
-    getBoxes();
-  }, [address]);
+  // useEffect(() => {
+  //   const getBoxes = async () => {
+  //     setIsLoading(true);
+  //     const { hiiboxReadContract } = await getHIIBOXContract();
+  //     const balance = await hiiboxReadContract.balanceOf(address ?? "");
+
+  //     const claimedBoxes = await hiiboxReadContract.getClaimedRewards(address);
+  //     console.log("claimedBoxes: ", claimedBoxes);
+
+  //     // balance -> number
+  //     // tokenOfOwnerByIndex -> index -> tokenID
+
+  //     // Example: If balance == 1
+  //     // tokenOfOwnerByIndex(0) => tokenID
+
+  //     // safeTransferFrom (address, address, tokenID)
+
+  //     setBoxBalance(Number(balance));
+  //     setIsLoading(false);
+  //   };
+  //   getBoxes();
+  // }, [address]);
 
   return (
     <div className="space-y-6">
@@ -159,9 +174,12 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="text-center">
+          <div className="text-center flex gap-2 items-center justify-center">
             <Badge variant="outline" className="text-sm">
               Cost: 1 Key
+            </Badge>
+            <Badge variant="default" className="text-sm">
+              Box: {isLoading ? <Skeleton className="w-5 h-5" /> : boxBalance}
             </Badge>
           </div>
           <div className="space-y-3 text-sm">
