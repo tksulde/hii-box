@@ -17,7 +17,7 @@ import {
   CampaignStatsComponent,
 } from "@/components/campaign-stats";
 import ThreeBoxCanvasHero from "@/components/box-canvas-hero";
-import { getHIIBOXContract } from "@/lib/HIIBOXContractHelper";
+import { getHIIBOXContract } from "@/lib/hii-box-contract-helper";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
