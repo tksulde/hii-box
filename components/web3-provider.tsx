@@ -27,7 +27,19 @@ export const modal = createAppKit({
   themeMode: "dark",
   features: {
     analytics: true, // Optional - defaults to your Cloud configuration
+    email: true,
+    socials: [
+      "google",
+      "x",
+      "github",
+      "discord",
+      "apple",
+      "facebook",
+      "farcaster",
+    ],
+    emailShowWallets: true, // default to true
   },
+  allWallets: "SHOW", // default to SHOW
   themeVariables: {
     "--w3m-accent": "#ccc",
   },
