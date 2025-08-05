@@ -25,9 +25,6 @@ import GradientText from "@/components/gradient-text";
 
 interface UserStats {
   keysEarned: number;
-  boxesOpened: number;
-  totalRewards: number;
-  completedTasks: number;
 }
 
 interface Social {
@@ -81,9 +78,6 @@ export default function Dashboard() {
   });
   const [userStats, setUserStats] = useState<UserStats>({
     keysEarned: 0,
-    boxesOpened: 1,
-    totalRewards: 50,
-    completedTasks: 4,
   });
   const [myBoxes, setMyBoxes] = useState<Boxes>({
     total_owned: 0,
@@ -98,8 +92,9 @@ export default function Dashboard() {
   const [notBurnedBoxes, setNotBurnedBoxes] = useState<Array<string>>([]);
 
   async function userStatsUpdate() {
-    const res = await get_request("/user/me");
-    setUserStats((prev) => ({ ...prev, keysEarned: res.data.key_count }));
+    const { data } = await get_request("/user/me");
+    console.log("userStatsUpdate", data);
+    setUserStats((prev) => ({ ...prev, keysEarned: data.key_count }));
     setIsLoading(false);
   }
 
@@ -151,7 +146,6 @@ export default function Dashboard() {
         }
       }
 
-      console.log("✅ boxIds -> ", boxIds);
       setNotBurnedBoxes(boxIds);
     } catch (err) {
       console.error("❌ getBoxes failed:", err);
@@ -205,7 +199,6 @@ export default function Dashboard() {
     }
 
     getBoxes();
-
     userStatsUpdate();
     userSocialUpdate();
     myBoxOpenedUpdate();
@@ -219,7 +212,7 @@ export default function Dashboard() {
 
   return (
     <div className="w-full">
-      <div className="py-30 flex flex-col items-center justify-center text-center text-6xl md:text-8xl font-bold tracking-tight ">
+      <div className="py-10 md:py-30 flex flex-col items-center justify-center text-center text-6xl md:text-8xl font-bold tracking-tight ">
         <h1>Hii Box</h1>
         <h1>Opening</h1>
       </div>
@@ -349,11 +342,6 @@ export default function Dashboard() {
               socials={socials}
               isSocialLoading={isSocialLoading}
               onTaskComplete={() => {
-                setUserStats((prev) => ({
-                  ...prev,
-                  keysEarned: prev.keysEarned + 1,
-                  completedTasks: prev.completedTasks + 1,
-                }));
                 userSocialUpdate();
               }}
             />

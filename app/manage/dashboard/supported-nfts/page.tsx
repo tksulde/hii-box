@@ -98,8 +98,6 @@ export default function SupportedNFTCollectionsPage() {
     getData();
   }, [getData]);
 
-  console.log(supportedNFTCollections);
-
   const handleAdd = useCallback(
     async (supported_nft_collection: any) => {
       setActionLoading(true);

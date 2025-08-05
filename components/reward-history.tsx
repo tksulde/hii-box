@@ -47,7 +47,7 @@ export function RewardHistory({ myBoxes }: RewardHistoryProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!myBoxes || myBoxes.length === 0) return;
+    if (!myBoxes || myBoxes.length === 0) return setLoading(false);
 
     const parsed: RewardEntry[] = myBoxes.map((box) => {
       let type: RewardEntry["type"] = "common";

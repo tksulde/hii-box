@@ -36,7 +36,7 @@ export function TwitterTaskDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose} aria-describedby={undefined}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Verify Twitter Task</DialogTitle>

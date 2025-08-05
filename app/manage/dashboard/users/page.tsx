@@ -65,8 +65,6 @@ export default function UsersPage() {
     getData();
   }, [getData]);
 
-  console.log(users);
-
   // const handleAdd = useCallback(
   //   async (newUser: any) => {
   //     setActionLoading(true);
