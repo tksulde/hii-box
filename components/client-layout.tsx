@@ -10,7 +10,6 @@ import { usePathname } from "next/navigation";
 export default function ClientLayout({
   children,
   cookies,
-  token,
 }: Readonly<{
   children: React.ReactNode;
   cookies: string | null;

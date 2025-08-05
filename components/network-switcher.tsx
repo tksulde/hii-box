@@ -52,6 +52,7 @@ export function NetworkSwitcher() {
         duration: 3000,
       });
     } catch (error) {
+      console.log(error);
       toast.error("Failed to switch network", {
         description: "Please try again or switch manually in your wallet",
         duration: 4000,

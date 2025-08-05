@@ -18,7 +18,7 @@ export default function SupportedNFTCollectionsPage() {
     SupportedNFTCollection[]
   >([]);
   const [actionLoading, setActionLoading] = useState(false);
-  const [currentFilter, setCurrentFilter] = useState<string | null>(null);
+  // const [currentFilter, setCurrentFilter] = useState<string | null>(null);
 
   const initialSupportedNFTCollection: SupportedNFTCollection = {
     id: 0,
@@ -105,14 +105,8 @@ export default function SupportedNFTCollectionsPage() {
       setActionLoading(true);
       try {
         // Validate collection_address format
-        const {
-          id,
-          collection_address,
-          collection_name,
-          description,
-          image_url,
-          website_url,
-        } = supported_nft_collection;
+        const { collection_address, collection_name } =
+          supported_nft_collection;
         if (!collection_address.startsWith("0x")) {
           toast("Error", {
             description: "Collection address must start with '0x'",
@@ -331,7 +325,7 @@ export default function SupportedNFTCollectionsPage() {
   );
 
   const handleFilterChange = async (field: string, value: string) => {
-    setCurrentFilter(value || null);
+    // setCurrentFilter(value || null);
     setActionLoading(true);
     try {
       const baseUrl = "/dashboard/supported-nft-collections";
@@ -352,8 +346,7 @@ export default function SupportedNFTCollectionsPage() {
 
   const renderFormFields = (
     formData: any,
-    handleChange: (field: string, value: unknown) => void,
-    type: "add" | "edit"
+    handleChange: (field: string, value: unknown) => void
   ) => {
     return (
       <div className="py-4">

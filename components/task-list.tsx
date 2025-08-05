@@ -118,6 +118,8 @@ export function TaskList({
   const handleTaskVerification = async (task: Task, username?: string) => {
     if (!userAddress) return;
 
+    console.log("username", username);
+
     setLoading(task.id);
 
     try {
@@ -140,6 +142,7 @@ export function TaskList({
         }
       }
     } catch (error) {
+      console.log(error);
       toast.error("Verification failed", {
         description: "Please complete the task requirements first.",
       });

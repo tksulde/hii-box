@@ -4,7 +4,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, useGLTF, Html } from "@react-three/drei";
 import { Suspense, useRef } from "react";
-// import confetti from "canvas-confetti";
 
 function BoxModel({ isOpening }: { isOpening: boolean }) {
   const { scene } = useGLTF("/base_basic_pbr.glb");

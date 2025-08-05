@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Package, Gift, Coins, TrendingUp, Users } from "lucide-react";
+import { Package, Gift, TrendingUp, Users } from "lucide-react";
 
 export interface CampaignStats {
   total_boxes: number;

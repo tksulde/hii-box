@@ -1,25 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useCallback, useState, useEffect } from "react";
-import {
-  get_request,
-  post_request,
-  patch_request,
-  delete_request,
-} from "@/services/crud";
+import { get_request, patch_request, delete_request } from "@/services/crud";
 import { Input } from "@/components/ui/input";
-import DynamicTable, {
-  ColumnDef,
-  FilterOption,
-} from "@/components/dynamic-table";
-import { Badge } from "@/components/ui/badge";
+import DynamicTable, { ColumnDef } from "@/components/dynamic-table";
 import { toast } from "sonner";
 
 export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
-  const [currentFilter, setCurrentFilter] = useState<string | null>(null);
+  // const [currentFilter, setCurrentFilter] = useState<string | null>(null);
 
   const initialUser: User = {
     id: 0,
@@ -76,48 +67,48 @@ export default function UsersPage() {
 
   console.log(users);
 
-  const handleAdd = useCallback(
-    async (newUser: any) => {
-      setActionLoading(true);
-      try {
-        // Validate wallet_address format
-        if (!newUser.wallet_address?.includes("@")) {
-          throw new Error("Please enter a valid wallet_address address");
-        }
+  // const handleAdd = useCallback(
+  //   async (newUser: any) => {
+  //     setActionLoading(true);
+  //     try {
+  //       // Validate wallet_address format
+  //       if (!newUser.wallet_address?.includes("@")) {
+  //         throw new Error("Please enter a valid wallet_address address");
+  //       }
 
-        const response = await post_request("/dashboard/users", newUser, {
-          "Content-Type": "application/json",
-        });
+  //       const response = await post_request("/dashboard/users", newUser, {
+  //         "Content-Type": "application/json",
+  //       });
 
-        // Refresh the users list
-        if (response.status === 200) {
-          getData();
+  //       // Refresh the users list
+  //       if (response.status === 200) {
+  //         getData();
 
-          toast("Амжилттай", {
-            description: "Хэрэглэгч амжилттай нэмэгдлээ",
-          });
-          return response.data;
-        } else {
-          toast("Алдаа", {
-            description:
-              response.data.detail || "Хэрэглэгч нэмэхэд алдаа гарлаа",
-            duration: 3000,
-          });
-          return response.data;
-        }
-      } catch (error: any) {
-        console.error("Error adding user:", error);
-        toast("Алдаа", {
-          description: error.message || "Хэрэглэгч нэмэхэд алдаа гарлаа",
-          duration: 3000,
-        });
-        throw error;
-      } finally {
-        setActionLoading(false);
-      }
-    },
-    [getData]
-  );
+  //         toast("Амжилттай", {
+  //           description: "Хэрэглэгч амжилттай нэмэгдлээ",
+  //         });
+  //         return response.data;
+  //       } else {
+  //         toast("Алдаа", {
+  //           description:
+  //             response.data.detail || "Хэрэглэгч нэмэхэд алдаа гарлаа",
+  //           duration: 3000,
+  //         });
+  //         return response.data;
+  //       }
+  //     } catch (error: any) {
+  //       console.error("Error adding user:", error);
+  //       toast("Алдаа", {
+  //         description: error.message || "Хэрэглэгч нэмэхэд алдаа гарлаа",
+  //         duration: 3000,
+  //       });
+  //       throw error;
+  //     } finally {
+  //       setActionLoading(false);
+  //     }
+  //   },
+  //   [getData]
+  // );
 
   const handleEdit = useCallback(
     async (user: any) => {
@@ -248,7 +239,7 @@ export default function UsersPage() {
   );
 
   const handleFilterChange = async (field: string, value: string) => {
-    setCurrentFilter(value || null);
+    // setCurrentFilter(value || null);
     setActionLoading(true);
     try {
       const baseUrl = "/dashboard/users";
@@ -269,8 +260,8 @@ export default function UsersPage() {
 
   const renderFormFields = (
     formData: any,
-    handleChange: (field: string, value: unknown) => void,
-    type: "add" | "edit"
+    handleChange: (field: string, value: unknown) => void
+    // type: "add" | "edit"
   ) => {
     return (
       <div className="py-4">
