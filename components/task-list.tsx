@@ -14,7 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { post_request } from "@/services/crud";
-import { TwitterTaskDialog } from "@/components/twitter-handle-dialog";
+import {
+  SocialTask,
+  SocialTaskDialog,
+} from "@/components/social-handle-dialog";
 import { FaTwitter, FaDiscord, FaTelegramPlane } from "react-icons/fa";
 import {
   CheckCircle,
@@ -92,8 +95,8 @@ export function TaskList({
   isSocialLoading,
 }: TaskListProps) {
   const [loading, setLoading] = useState<string | null>(null);
-  const [showTwitterDialog, setShowTwitterDialog] = useState(false);
-  const [twitterTask, setTwitterTask] = useState<Task | null>(null);
+  const [socialDialogOpen, setSocialDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<SocialTask | null>(null);
 
   const tasks: Task[] = useMemo(() => {
     return initialTasks.map((task) => ({
@@ -102,24 +105,12 @@ export function TaskList({
     }));
   }, [socials]);
 
-  const handleSocial = async (platform: string): Promise<string> => {
-    const { data } = await post_request("/user/socials", { platform });
-    return data?.message || "Social task verified";
-  };
-
-  const handleSocialTwitter = async (
+  const handleSocial = async (
     platform: string,
-    username: string
+    handle: string
   ): Promise<string> => {
-    const { data, status } = await post_request("/user/twitter", {
-      platform,
-      handle: username,
-    });
-    if (status < 300) {
-      return data?.message || "Social task verified";
-    } else {
-      return data?.detail ?? "Social task failed";
-    }
+    const { data } = await post_request("/user/socials", { platform, handle });
+    return data?.message || "Social task verified";
   };
 
   const checkNFT = async (): Promise<any> => {
@@ -130,25 +121,20 @@ export function TaskList({
     };
   };
 
-  const handleTaskVerification = async (task: Task, username?: string) => {
+  const handleTaskVerification = async (task: Task, username: string) => {
     if (!userAddress) return;
 
     setLoading(task.id);
 
     try {
       if (task.type === "social" && task.platform) {
-        if (task.platform === "twitter" && username) {
-          await handleSocialTwitter(task.platform, username);
-        } else {
-          await handleSocial(task.platform);
-        }
-        toast.success(`Twitter task verified 🎉`, {
+        await handleSocial(task.platform, username);
+        toast.success(`Social task verified 🎉`, {
           icon: <Key className="h-4 w-4" />,
         });
         onTaskComplete();
       } else if (task.type === "nft") {
         const { message, status } = await checkNFT();
-
         if (status < 300) {
           toast.success(`${message} 🎉`, {
             icon: <Key className="h-4 w-4" />,
@@ -199,11 +185,14 @@ export function TaskList({
   const totalTasks = tasks.length;
 
   const handleVerifyClick = (task: Task) => {
-    if (task.platform === "twitter") {
-      setTwitterTask(task);
-      setShowTwitterDialog(true);
-    } else {
-      handleTaskVerification(task);
+    if (task.type === "social" && task.platform) {
+      setSelectedTask({
+        id: task.id,
+        label: task.title,
+        platform: task.platform,
+        url: task.verificationUrl ?? "#",
+      });
+      setSocialDialogOpen(true);
     }
   };
 
@@ -278,7 +267,11 @@ export function TaskList({
                   )}
                 </div>
                 <Button
-                  onClick={() => handleVerifyClick(task)}
+                  onClick={() =>
+                    task.type === "social"
+                      ? handleVerifyClick(task)
+                      : handleTaskVerification(task, "")
+                  }
                   disabled={
                     task.completed || loading === task.id || isSocialLoading
                   }
@@ -297,14 +290,18 @@ export function TaskList({
         ))}
       </div>
 
-      {twitterTask && (
-        <TwitterTaskDialog
-          open={showTwitterDialog}
-          verificationUrl={twitterTask.verificationUrl ?? ""}
-          onClose={() => setShowTwitterDialog(false)}
-          onVerify={async (username: string) => {
-            await handleTaskVerification(twitterTask, username);
-            setShowTwitterDialog(false);
+      {selectedTask && (
+        <SocialTaskDialog
+          open={socialDialogOpen}
+          onClose={() => setSocialDialogOpen(false)}
+          task={selectedTask}
+          tasks={[selectedTask]} // for dialog prop signature
+          onVerify={async (username) => {
+            await handleTaskVerification(
+              tasks.find((t) => t.id === selectedTask.id)!,
+              username!
+            );
+            setSocialDialogOpen(false);
           }}
         />
       )}
