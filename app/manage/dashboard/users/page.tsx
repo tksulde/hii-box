@@ -1,25 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useCallback, useState, useEffect } from "react";
-import {
-  get_request,
-  post_request,
-  patch_request,
-  delete_request,
-} from "@/services/crud";
+import { get_request, patch_request, delete_request } from "@/services/crud";
 import { Input } from "@/components/ui/input";
-import DynamicTable, {
-  ColumnDef,
-  FilterOption,
-} from "@/components/dynamic-table";
-import { Badge } from "@/components/ui/badge";
+import DynamicTable, { ColumnDef } from "@/components/dynamic-table";
 import { toast } from "sonner";
 
 export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
-  const [currentFilter, setCurrentFilter] = useState<string | null>(null);
+  // const [currentFilter, setCurrentFilter] = useState<string | null>(null);
 
   const initialUser: User = {
     id: 0,
@@ -193,7 +184,7 @@ export default function UsersPage() {
   );
 
   const handleFilterChange = async (field: string, value: string) => {
-    setCurrentFilter(value || null);
+    // setCurrentFilter(value || null);
     setActionLoading(true);
     try {
       const baseUrl = "/dashboard/users";
@@ -214,8 +205,8 @@ export default function UsersPage() {
 
   const renderFormFields = (
     formData: any,
-    handleChange: (field: string, value: unknown) => void,
-    type: "add" | "edit"
+    handleChange: (field: string, value: unknown) => void
+    // type: "add" | "edit"
   ) => {
     return (
       <div className="py-4">

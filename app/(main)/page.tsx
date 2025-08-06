@@ -17,7 +17,7 @@ import {
   CampaignStatsComponent,
 } from "@/components/campaign-stats";
 import ThreeBoxCanvasHero from "@/components/box-canvas-hero";
-import { getHIIBOXContract } from "@/lib/HIIBOXContractHelper";
+import { getHIIBOXContract } from "@/lib/hii-box-contract-helper";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -25,9 +25,6 @@ import GradientText from "@/components/gradient-text";
 
 interface UserStats {
   keysEarned: number;
-  boxesOpened: number;
-  totalRewards: number;
-  completedTasks: number;
 }
 
 interface Social {
@@ -53,18 +50,8 @@ export interface MyBox {
 }
 
 interface Boxes {
-  user: {
-    id: number;
-    total_boxes_opened: number;
-    wallet_address: string;
-  };
   boxes: MyBox[];
-  pagination: {
-    has_more: boolean;
-    limit: number;
-    offset: number;
-    total: number;
-  };
+  total_owned: number;
 }
 
 export default function Dashboard() {
@@ -73,6 +60,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [isBoxLoading, setIsBoxLoading] = useState(false);
   const [isMyBoxLoading, setIsMyBoxLoading] = useState(false);
+  const [isMyBoxOpenedLoading, setIsBoxOpenedLoading] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState(false);
   const [isBurning, setIsBurning] = useState<string>("");
 
@@ -90,30 +78,23 @@ export default function Dashboard() {
   });
   const [userStats, setUserStats] = useState<UserStats>({
     keysEarned: 0,
-    boxesOpened: 1,
-    totalRewards: 50,
-    completedTasks: 4,
   });
   const [myBoxes, setMyBoxes] = useState<Boxes>({
-    user: {
-      id: 0,
-      total_boxes_opened: 0,
-      wallet_address: "",
-    },
+    total_owned: 0,
     boxes: [],
-    pagination: {
-      has_more: false,
-      limit: 0,
-      offset: 0,
-      total: 0,
-    },
+  });
+
+  const [myBoxesOpened, setMyBoxesOpened] = useState<Boxes>({
+    total_owned: 0,
+    boxes: [],
   });
 
   const [notBurnedBoxes, setNotBurnedBoxes] = useState<Array<string>>([]);
 
   async function userStatsUpdate() {
-    const res = await get_request("/user/me");
-    setUserStats((prev) => ({ ...prev, keysEarned: res.data.key_count }));
+    const { data } = await get_request("/user/me");
+    console.log("userStatsUpdate", data);
+    setUserStats((prev) => ({ ...prev, keysEarned: data.key_count }));
     setIsLoading(false);
   }
 
@@ -123,10 +104,16 @@ export default function Dashboard() {
     setIsBoxLoading(false);
   }
 
-  async function myBoxOpenedUpdate() {
-    const res = await get_request("/boxes/my-owned");
+  async function myBoxOwnedUpdate() {
+    const res = await get_request("/user/my-owned");
     setMyBoxes(res.data);
     setIsBoxLoading(false);
+  }
+
+  async function myBoxOpenedUpdate() {
+    const res = await get_request("/user/my-opened");
+    setMyBoxesOpened(res.data);
+    setIsBoxOpenedLoading(false);
   }
 
   async function userSocialUpdate() {
@@ -136,25 +123,40 @@ export default function Dashboard() {
   }
 
   async function getBoxes() {
-    setIsMyBoxLoading(true);
+    if (!address) return;
+    try {
+      setIsMyBoxLoading(true);
+      setNotBurnedBoxes([]);
 
-    const { hiiboxReadContract } = await getHIIBOXContract();
-    const balanceBN = await hiiboxReadContract.balanceOf(address ?? "");
-    const balance = Number(balanceBN);
+      const { hiiboxReadContract } = await getHIIBOXContract();
+      const balanceBN = await hiiboxReadContract.balanceOf(address);
+      const balance = Number(balanceBN);
 
-    const boxIds: string[] = [];
+      const boxIds: string[] = [];
 
-    for (let i = 0; i < balance; i++) {
-      const tokenId = await hiiboxReadContract.tokenOfOwnerByIndex(address, i);
-      boxIds.push(tokenId.toString()); // cast BigNumber to string
+      for (let i = 0; i < balance; i++) {
+        try {
+          const tokenId = await hiiboxReadContract.tokenOfOwnerByIndex(
+            address,
+            i
+          );
+          boxIds.push(tokenId.toString());
+        } catch (err) {
+          console.error(`Failed to get token at index ${i}:`, err);
+        }
+      }
+
+      setNotBurnedBoxes(boxIds);
+    } catch (err) {
+      console.error("❌ getBoxes failed:", err);
+    } finally {
+      setIsMyBoxLoading(false);
     }
-
-    setNotBurnedBoxes(boxIds);
-
-    setIsMyBoxLoading(false);
   }
 
   async function burnBox(boxId: string) {
+    if (!address || !boxId) return;
+
     setIsBurning(boxId);
 
     try {
@@ -164,33 +166,43 @@ export default function Dashboard() {
         "0xC7a6939038234CBc7ab2D26e7a593785e522E12c",
         boxId
       );
-      console.log(tx.hash);
-      toast.success("Box deposited successfully", {
+
+      await tx.wait();
+
+      myBoxOpenedUpdate();
+      myBoxOwnedUpdate();
+
+      toast.success(`Box #${boxId} burned successfully 🔥`, {
         icon: <Key className="h-4 w-4" />,
       });
-    } catch (e) {
-      toast.error("Box deposited failed.", {
-        icon: <Key className="h-4 w-4" />,
-      });
+    } catch (e: any) {
+      if (e.code === "ACTION_REJECTED") {
+        toast.error("User rejected the transaction");
+      } else {
+        toast.error("Box burn failed.");
+        console.error("❌ burnBox error:", e);
+      }
+    } finally {
+      setIsBurning("");
+      setTimeout(() => getBoxes(), 1500);
     }
-    setIsBurning("");
-    setTimeout(() => getBoxes(), 500);
   }
 
   useEffect(() => {
     setIsLoading(true);
     setIsBoxLoading(true);
     setIsSocialLoading(true);
+    setIsBoxOpenedLoading(true);
 
     if (!address || status !== "authenticated") {
       return;
     }
 
     getBoxes();
-
     userStatsUpdate();
     userSocialUpdate();
     myBoxOpenedUpdate();
+    myBoxOwnedUpdate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, status]);
 
@@ -200,7 +212,7 @@ export default function Dashboard() {
 
   return (
     <div className="w-full">
-      <div className="py-30 flex flex-col items-center justify-center text-center text-6xl md:text-8xl font-bold tracking-tight ">
+      <div className="py-10 md:py-30 flex flex-col items-center justify-center text-center text-6xl md:text-8xl font-bold tracking-tight ">
         <h1>Hii Box</h1>
         <h1>Opening</h1>
       </div>
@@ -258,7 +270,11 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">
-                    {userStats.boxesOpened}
+                    {isMyBoxOpenedLoading ? (
+                      <Skeleton className="w-8 h-9" />
+                    ) : (
+                      myBoxesOpened.total_owned
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
                     Total opened
@@ -326,11 +342,6 @@ export default function Dashboard() {
               socials={socials}
               isSocialLoading={isSocialLoading}
               onTaskComplete={() => {
-                setUserStats((prev) => ({
-                  ...prev,
-                  keysEarned: prev.keysEarned + 1,
-                  completedTasks: prev.completedTasks + 1,
-                }));
                 userSocialUpdate();
               }}
             />
@@ -340,10 +351,13 @@ export default function Dashboard() {
             <div className="max-w-lg w-full mx-auto">
               <BoxOpening
                 availableKeys={userStats.keysEarned}
+                boxBalance={myBoxes.total_owned}
+                myBoxes={myBoxes.boxes}
                 onBoxOpened={() => {
                   userStatsUpdate();
                   boxStatsUpdate();
                   myBoxOpenedUpdate();
+                  myBoxOwnedUpdate();
                 }}
               />
             </div>
@@ -353,7 +367,7 @@ export default function Dashboard() {
             value="rewards"
             className="animate-fade-in min-h-[50svh]"
           >
-            <RewardHistory myBoxes={myBoxes.boxes} />
+            <RewardHistory myBoxes={myBoxesOpened.boxes} />
           </TabsContent>
         </Tabs>
       )}

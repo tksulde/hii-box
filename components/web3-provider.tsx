@@ -28,6 +28,7 @@ export const modal = createAppKit({
   features: {
     analytics: true, // Optional - defaults to your Cloud configuration
   },
+  allWallets: "SHOW", // default to SHOW
   themeVariables: {
     "--w3m-accent": "#ccc",
   },

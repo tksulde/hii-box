@@ -15,7 +15,7 @@ import { MyBox } from "@/app/(main)/page"; // <-- Make sure this matches your ba
 
 interface RewardEntry {
   id: string;
-  type: "ape" | "nft" | "ticket" | "common";
+  type: "ape" | "nft" | "ticket" | "common" | "points";
   name: string;
   amount?: number;
   rarity: "common" | "rare" | "epic" | "legendary";
@@ -47,51 +47,53 @@ export function RewardHistory({ myBoxes }: RewardHistoryProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!myBoxes || myBoxes.length === 0) return;
+    if (!myBoxes || myBoxes.length === 0) return setLoading(false);
 
-    const parsed: RewardEntry[] = myBoxes
-      .filter((b) => b.status === "opened")
-      .map((box) => {
-        let type: RewardEntry["type"] = "common";
-        let rarity: RewardEntry["rarity"] = "common";
-        const name = box.reward_description ?? "Mystery Reward";
+    const parsed: RewardEntry[] = myBoxes.map((box) => {
+      let type: RewardEntry["type"] = "common";
+      let rarity: RewardEntry["rarity"] = "common";
+      const name = box.reward_description ?? "Mystery Reward";
 
-        // 🎯 Type logic
-        if (box.reward_type?.includes("apecoin")) {
-          type = "ape";
-        } else if (box.reward_type?.includes("nft")) {
-          type = "nft";
-        } else if (box.reward_type?.includes("ticket")) {
-          type = "ticket";
-        }
+      // 🎯 Type logic
+      if (box.reward_type?.includes("goblin_points")) {
+        type = "points"; // NEW TYPE
+      } else if (box.reward_type?.includes("apecoin")) {
+        type = "ape";
+      } else if (box.reward_type?.includes("nft")) {
+        type = "nft";
+      } else if (box.reward_type?.includes("ticket")) {
+        type = "ticket";
+      }
 
-        // 🧠 Rarity logic
-        if (box.reward_tier) {
-          rarity = mapTierToRarity(box.reward_tier);
-        } else if (box.reward_type?.includes("rare")) {
-          rarity = "rare";
-        } else if (box.reward_type?.includes("epic")) {
-          rarity = "epic";
-        } else if (box.reward_type?.includes("legendary")) {
-          rarity = "legendary";
-        }
+      // 🧠 Rarity logic
+      if (box.reward_tier) {
+        rarity = mapTierToRarity(box.reward_tier);
+      } else if (box.reward_type?.includes("rare")) {
+        rarity = "rare";
+      } else if (box.reward_type?.includes("epic")) {
+        rarity = "epic";
+      } else if (box.reward_type?.includes("legendary")) {
+        rarity = "legendary";
+      }
 
-        // 💰 APE logic
-        const amount =
-          type === "ape" && box.reward_data?.amount
-            ? Number(box.reward_data.amount)
-            : undefined;
+      // 💰 Amount logic
+      let amount: number | undefined = undefined;
+      if (type === "points") {
+        amount = Number(box.reward_data?.points ?? 0);
+      } else if (type === "ape" && box.reward_data?.amount) {
+        amount = Number(box.reward_data.amount);
+      }
 
-        return {
-          id: String(box.id),
-          type,
-          name,
-          rarity,
-          amount,
-          timestamp: new Date(box.opened_at),
-          txHash: box.txHash,
-        };
-      });
+      return {
+        id: String(box.id),
+        type,
+        name,
+        rarity,
+        amount,
+        timestamp: new Date(box.opened_at),
+        txHash: box.txHash,
+      };
+    });
 
     setRewards(parsed);
     setLoading(false);
@@ -127,6 +129,10 @@ export function RewardHistory({ myBoxes }: RewardHistoryProps) {
   const totalApeEarned = rewards
     .filter((r) => r.type === "ape")
     .reduce((sum, r) => sum + (r.amount || 0), 0);
+
+  const totalPoints = rewards
+    .filter((r) => r.type === "points")
+    .reduce((sum, r) => sum + (r.amount ?? 0), 0);
 
   if (loading) {
     return (
@@ -168,11 +174,14 @@ export function RewardHistory({ myBoxes }: RewardHistoryProps) {
         <Card className="card-shadow border-border/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Rewards
+              Total Goblin Points
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{rewards.length}</div>
+            <div className="text-3xl font-bold">
+              {" "}
+              {totalPoints.toLocaleString()} pts
+            </div>
           </CardContent>
         </Card>
       </div>

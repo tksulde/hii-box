@@ -1,21 +1,5 @@
 "use client";
-import {
-  Home,
-  Users,
-  FileUser,
-  Box,
-  Boxes,
-  Logs,
-  FileKey,
-  Receipt,
-  ReceiptText,
-  FileText,
-  ChevronDown,
-  ChevronRight,
-  PenTool,
-  Shield,
-  FileSearch,
-} from "lucide-react";
+import { Home, Users, FileUser } from "lucide-react";
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -24,24 +8,12 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarRail,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import Link from "next/link";
-import Image from "next/image";
-import { useTheme } from "next-themes";
 import { Label } from "@radix-ui/react-label";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function Sidebar() {
-  const { theme } = useTheme();
   const pathname = usePathname();
 
   const isActive = (path: string) => pathname === path;

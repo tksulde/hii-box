@@ -15,7 +15,9 @@ import { Key } from "lucide-react";
 import { post_request } from "@/services/crud";
 import ThreeBoxCanvas from "./box-canvas";
 import confetti from "canvas-confetti";
-import { Skeleton } from "./ui/skeleton";
+import { MyBox } from "@/app/(main)/page";
+import { BoxOpenDialog } from "./box-open-dialog";
+
 interface Reward {
   type: "ape" | "nft" | "ticket";
   name: string;
@@ -27,29 +29,32 @@ interface Reward {
 interface Props {
   availableKeys: number;
   onBoxOpened: (reward: Reward) => void;
+  boxBalance: number;
+  myBoxes: MyBox[];
 }
 
-export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
+export function BoxOpening({
+  availableKeys,
+  onBoxOpened,
+  boxBalance,
+  myBoxes,
+}: Props) {
   const [animation, setAnimation] = useState<
     "idle" | "shaking" | "opening" | "revealing"
   >("idle");
-
-  // const { address } = useAccount();
-  const [isLoading, setIsLoading] = useState(false);
-  const [boxBalance, setBoxBalance] = useState(0);
-
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [rotateSpeed, setRotateSpeed] = useState(1);
 
   const REWARDS: Reward[] = [
     {
       type: "nft",
-      name: "Standard NFT",
+      name: "100k Points",
       rarity: "common",
       weight: 90000,
     },
     {
       type: "ape",
-      name: "50 APE",
+      name: "1 APE",
       amount: 50,
       rarity: "rare",
       weight: 4000,
@@ -77,10 +82,10 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
         "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
     }[rarity]);
 
-  const openBox = async () => {
-    if (availableKeys <= 0) {
-      toast.error("No keys available", {
-        description: "You need at least 1 key to open a box.",
+  const openBox = async (id: number) => {
+    if (availableKeys <= 0 || boxBalance <= 0) {
+      toast.error("No keys or boxes available", {
+        description: "You need at least 1 key and 1 box to open a box.",
         icon: <Key className="h-4 w-4" />,
       });
       return;
@@ -93,8 +98,8 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
 
     toast.promise(
       async () => {
-        const { data, status } = await post_request("/boxes/open", {
-          box_position: 69,
+        const { data, status } = await post_request("/user/open", {
+          id: Number(id),
         });
 
         if (status > 300) {
@@ -102,57 +107,32 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
         }
 
         const reward: Reward = data.box || REWARDS[0];
+        await new Promise((r) => setTimeout(r, 1000));
 
-        await new Promise((r) => setTimeout(r, 500));
         setAnimation("revealing");
         onBoxOpened(reward);
 
-        confetti({
-          particleCount: 150,
-          spread: 80,
-          origin: { y: 0.6 },
-        });
-
         await new Promise((r) => setTimeout(r, 1000));
-
-        return reward;
+        return data;
       },
       {
         loading: "Opening your box...",
-        success: (reward) => {
-          return `You received: ${reward.name}`;
+        success: async (data) => {
+          await new Promise((r) => setTimeout(r, 1500));
+          setAnimation("idle");
+          confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.6 },
+          });
+          return `You received: ${data.message}`;
         },
         error: (err) => `${err.message ?? "Box opening failed"}`,
       }
     );
 
-    await new Promise((r) => setTimeout(r, 2000));
-    setAnimation("idle");
     setRotateSpeed(1);
   };
-
-  // useEffect(() => {
-  //   const getBoxes = async () => {
-  //     setIsLoading(true);
-  //     const { hiiboxReadContract } = await getHIIBOXContract();
-  //     const balance = await hiiboxReadContract.balanceOf(address ?? "");
-
-  //     const claimedBoxes = await hiiboxReadContract.getClaimedRewards(address);
-  //     console.log("claimedBoxes: ", claimedBoxes);
-
-  //     // balance -> number
-  //     // tokenOfOwnerByIndex -> index -> tokenID
-
-  //     // Example: If balance == 1
-  //     // tokenOfOwnerByIndex(0) => tokenID
-
-  //     // safeTransferFrom (address, address, tokenID)
-
-  //     setBoxBalance(Number(balance));
-  //     setIsLoading(false);
-  //   };
-  //   getBoxes();
-  // }, [address]);
 
   return (
     <div className="space-y-6">
@@ -164,24 +144,27 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
             }`}
           >
             <ThreeBoxCanvas
-              isOpening={animation === "opening"}
+              isOpening={animation !== "idle"}
               rotateSpeed={rotateSpeed}
             />
           </div>
-          <CardTitle className="text-lg mt-4">Hii Mystery Box</CardTitle>
+          <CardTitle className="text-lg mt-4 flex justify-between">
+            <p> Hii Mystery Box</p>
+            <div className="flex gap-2">
+              <Badge variant="outline" className="text-sm">
+                Key: {availableKeys}
+              </Badge>
+              <Badge variant="default" className="text-sm">
+                Box: {boxBalance}
+              </Badge>
+            </div>
+          </CardTitle>
+
           <CardDescription>
-            1 key = 1 box. Win NFTs, APE, or a Vegas ticket 🎁
+            1 key = 1 box. Win NFTs, APE, or a Vegas ticket 🏱
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-center flex gap-2 items-center justify-center">
-            <Badge variant="outline" className="text-sm">
-              Cost: 1 Key
-            </Badge>
-            <Badge variant="default" className="text-sm">
-              Box: {isLoading ? <Skeleton className="w-5 h-5" /> : boxBalance}
-            </Badge>
-          </div>
+        <CardContent className="space-y-4 border-t pt-4">
           <div className="space-y-3 text-sm">
             <p className="font-medium">Possible Rewards</p>
             {REWARDS.map((r, i) => (
@@ -192,14 +175,26 @@ export function BoxOpening({ availableKeys, onBoxOpened }: Props) {
             ))}
           </div>
           <Button
-            onClick={openBox}
-            disabled={availableKeys <= 0 || animation !== "idle"}
+            onClick={() => setDialogOpen(true)}
+            disabled={
+              availableKeys <= 0 || animation !== "idle" || boxBalance <= 0
+            }
             className="w-full"
           >
             {animation === "idle" ? "Open Box" : "Opening..."}
           </Button>
         </CardContent>
       </Card>
+
+      <BoxOpenDialog
+        open={dialogOpen}
+        boxIds={myBoxes.map((box) => box.id.toString())}
+        onClose={() => setDialogOpen(false)}
+        onSelectBox={async (boxId: number) => {
+          setDialogOpen(false);
+          await openBox(boxId);
+        }}
+      />
     </div>
   );
 }

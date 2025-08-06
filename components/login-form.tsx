@@ -37,7 +37,6 @@ export function LoginForm({
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log("Login button clicked", data);
     const res = await signIn("admin-login", {
       username: data.username,
       password: data.password,

@@ -107,6 +107,21 @@ export function TaskList({
     return data?.message || "Social task verified";
   };
 
+  const handleSocialTwitter = async (
+    platform: string,
+    username: string
+  ): Promise<string> => {
+    const { data, status } = await post_request("/user/twitter", {
+      platform,
+      handle: username,
+    });
+    if (status < 300) {
+      return data?.message || "Social task verified";
+    } else {
+      return data?.detail ?? "Social task failed";
+    }
+  };
+
   const checkNFT = async (): Promise<any> => {
     const { data, status } = await post_request("/user/nfts/check-nfts", {});
     return {
@@ -122,7 +137,11 @@ export function TaskList({
 
     try {
       if (task.type === "social" && task.platform) {
-        await handleSocial(task.platform);
+        if (task.platform === "twitter" && username) {
+          await handleSocialTwitter(task.platform, username);
+        } else {
+          await handleSocial(task.platform);
+        }
         toast.success(`Twitter task verified 🎉`, {
           icon: <Key className="h-4 w-4" />,
         });
@@ -140,6 +159,7 @@ export function TaskList({
         }
       }
     } catch (error) {
+      console.log(error);
       toast.error("Verification failed", {
         description: "Please complete the task requirements first.",
       });

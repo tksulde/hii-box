@@ -712,11 +712,11 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
   renderFormFields,
   isLoading = false,
   title = "Items",
-  description = "Manage your items",
+  // description = "Manage your items",
   showSearch = true,
   showFilters = true,
   showActions = true,
-  emptyMessage = 'No items found. Click "Add New" to create one.',
+  // emptyMessage = 'No items found. Click "Add New" to create one.',
   itemsPerPage = 10,
 }) => {
   const [filteredData, setFilteredData] = useState<DataItem[]>(initialData);
