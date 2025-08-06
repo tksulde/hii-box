@@ -93,7 +93,6 @@ export default function Dashboard() {
 
   async function userStatsUpdate() {
     const { data } = await get_request("/user/me");
-    console.log("userStatsUpdate", data);
     setUserStats((prev) => ({ ...prev, keysEarned: data.key_count }));
     setIsLoading(false);
   }

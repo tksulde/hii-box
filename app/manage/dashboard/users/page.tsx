@@ -84,8 +84,8 @@ export default function UsersPage() {
           "application/json"
         );
         if (response.status === 200) {
-          toast("Амжилттай", {
-            description: "Хэрэглэгч амжилттай засагдлаа",
+          toast("Success", {
+            description: "User updated successfully",
           });
 
           // Refresh the users list
@@ -93,9 +93,10 @@ export default function UsersPage() {
 
           return response.data;
         } else {
-          toast("Алдаа", {
+          toast("Error", {
             description:
-              response.data.detail || "Хэрэглэгч засах үед алдаа гарлаа",
+              response.data.detail ||
+              "An error occurred while updating the user",
             duration: 3000,
           });
 
@@ -103,8 +104,9 @@ export default function UsersPage() {
         }
       } catch (error: any) {
         console.error("Error updating user:", error);
-        toast("Алдаа", {
-          description: error.message || "Хэрэглэгч засах үед алдаа гарлаа",
+        toast("Error", {
+          description:
+            error.message || "An error occurred while updating the user",
           duration: 3000,
         });
         throw error;
@@ -122,21 +124,23 @@ export default function UsersPage() {
         const response = await delete_request("/dashboard/users", id);
         if (response.status == 200) {
           getData();
-          toast("Амжилттай", {
-            description: "Хэрэглэгч амжилттай устгагдлаа",
+          toast("Success", {
+            description: "User deleted successfully",
           });
         } else {
-          toast("Алдаа", {
+          toast("Error", {
             description:
-              response.data.detail || "Хэрэглэгч засах үед алдаа гарлаа",
+              response.data.detail ||
+              "An error occurred while updating the user",
             duration: 3000,
           });
         }
       } catch (error: any) {
         console.error("Error deleting user:", error);
 
-        toast("Алдаа", {
-          description: error.message || "Хэрэглэгч устгах үед алдаа гарлаа",
+        toast("Error", {
+          description:
+            error.message || "An error occurred while deleting the user",
           duration: 3000,
         });
       } finally {
@@ -167,13 +171,14 @@ export default function UsersPage() {
 
         getData();
 
-        toast("Амжилттай", {
-          description: "Хэрэглэгч амжилттай устгагдлаа",
+        toast("Success", {
+          description: "User deleted successfully",
         });
       } catch (error: any) {
         console.error("Error deleting multiple users:", error);
-        toast("Алдаа", {
-          description: error.message || "Хэрэглэгч устгах үед алдаа гарлаа",
+        toast("Error", {
+          description:
+            error.message || "An error occurred while deleting the user",
           duration: 3000,
         });
       } finally {
