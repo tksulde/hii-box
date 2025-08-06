@@ -74,70 +74,16 @@ export default function UsersPage() {
     getData();
   }, [getData]);
 
-  console.log(users);
-
-  const handleAdd = useCallback(
-    async (newUser: any) => {
-      setActionLoading(true);
-      try {
-        // Validate wallet_address format
-        if (!newUser.wallet_address?.includes("@")) {
-          throw new Error("Please enter a valid wallet_address address");
-        }
-
-        const response = await post_request("/dashboard/users", newUser, {
-          "Content-Type": "application/json",
-        });
-
-        // Refresh the users list
-        if (response.status === 200) {
-          getData();
-
-          toast("Амжилттай", {
-            description: "Хэрэглэгч амжилттай нэмэгдлээ",
-          });
-          return response.data;
-        } else {
-          toast("Алдаа", {
-            description:
-              response.data.detail || "Хэрэглэгч нэмэхэд алдаа гарлаа",
-            duration: 3000,
-          });
-          return response.data;
-        }
-      } catch (error: any) {
-        console.error("Error adding user:", error);
-        toast("Алдаа", {
-          description: error.message || "Хэрэглэгч нэмэхэд алдаа гарлаа",
-          duration: 3000,
-        });
-        throw error;
-      } finally {
-        setActionLoading(false);
-      }
-    },
-    [getData]
-  );
-
   const handleEdit = useCallback(
     async (user: any) => {
       setActionLoading(true);
       try {
-        // Validate wallet_address format
-        if (!user.wallet_address?.includes("@")) {
-          throw new Error("Please enter a valid wallet_address address");
-        }
-        const { id, wallet_address, activation_expires } = user;
-
-        const activationDate = new Date(activation_expires);
-        if (isNaN(activationDate.getTime())) {
-          throw new Error("Invalid activation expiration date.");
-        }
+        const { id, wallet_address, key_count } = user;
 
         const patchData = {
           id,
           wallet_address,
-          activation_expires,
+          key_count,
         };
 
         const response = await patch_request(
@@ -213,7 +159,6 @@ export default function UsersPage() {
     async (ids: number[]) => {
       setActionLoading(true);
       try {
-        // Perform delete operations for all ids in parallel
         const deletePromises = ids.map((id) =>
           delete_request("/dashboard/users", id)
             .then((response) => {
