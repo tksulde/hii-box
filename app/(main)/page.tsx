@@ -342,6 +342,7 @@ export default function Dashboard() {
               isSocialLoading={isSocialLoading}
               onTaskComplete={() => {
                 userSocialUpdate();
+                userStatsUpdate();
               }}
             />
           </TabsContent>
