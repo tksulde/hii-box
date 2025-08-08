@@ -51,7 +51,7 @@ export function SocialTaskDialog({ open, onClose, onVerify, task }: Props) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose} aria-describedby={undefined}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Complete Social Task</DialogTitle>

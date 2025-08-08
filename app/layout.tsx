@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Hiilink Box Opening",
     description: "Hiilink Box Opening",
-    url: "https://your-site.com",
+    url: "https://box.hii.link",
     images: ["https://giveaway.hii.link/og-image.jpg"],
   },
 };
