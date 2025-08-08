@@ -1,5 +1,5 @@
 "use client";
-import { Home, Users, FileUser } from "lucide-react";
+import { Home, Users, FileUser, Contact } from "lucide-react";
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -25,6 +25,11 @@ export default function Sidebar() {
       href: "/manage/dashboard",
     },
     { icon: Users, label: "Users", href: "/manage/dashboard/users" },
+    {
+      icon: Contact,
+      label: "Social Tasks",
+      href: "/manage/dashboard/social-tasks",
+    },
     {
       icon: FileUser,
       label: "Supported NFTs",

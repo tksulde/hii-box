@@ -117,6 +117,16 @@ interface User extends DataItem {
   updated_at?: string;
 }
 
+interface SocialTask extends DataItem {
+  id: number;
+  task_type: string;
+  link: string;
+  platform: string;
+  reward_key_count: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 interface UserPayment {
   id: number;
   user_id: number;

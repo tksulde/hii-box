@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 const breadcrumbMap: { [key: string]: string } = {
   "/manage/dashboard/users": "Users",
+  "/manage/dashboard/social-tasks": "Social Tasks",
   "/manage/dashboard/supported-nfts": "Supported NFTs",
 };
 
