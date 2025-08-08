@@ -23,7 +23,6 @@ export async function getContractEssentials() {
   let provider;
   provider = ethers.getDefaultProvider();
   if (window.ethereum == null) {
-    console.log("MetaMask not installed; using read-only defaults");
     provider = ethers.getDefaultProvider();
   } else {
     provider = new ethers.BrowserProvider(window?.ethereum as any);
