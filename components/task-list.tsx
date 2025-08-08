@@ -21,7 +21,6 @@ import {
 import { FaTwitter, FaDiscord, FaTelegramPlane } from "react-icons/fa";
 import {
   CheckCircle,
-  Heart,
   MessageCircle,
   Circle,
   ExternalLink,
@@ -43,48 +42,228 @@ interface Task {
 interface TaskListProps {
   userAddress?: string;
   onTaskComplete: () => void;
-  socials: { platform: string }[];
+  socials: { platform: string; id: number }[];
   isSocialLoading: boolean;
 }
 
 const initialTasks: Task[] = [
   {
-    id: "1",
-    title: "Hold Bored Ape NFT",
-    description: "Own at least 1 Bored Ape Yacht Club NFT in your wallet",
+    id: "101",
+    title: "Hold The Mich Khan or Bichka NFT",
+    description:
+      "Earn keys by holding either NFT. The Mich Khan = 10 keys, Bichka = 5 keys per NFT. Keys are calculated automatically.",
     type: "nft",
-    reward: 3,
+    reward: 0, // Real reward handled on backend (nftCount * multiplier)
     completed: false,
   },
+  // Twitter Follows
   {
-    id: "2",
-    title: "Follow @HiiLink on Twitter",
-    description: "Follow our official Twitter account for updates",
+    id: "1",
+    title: "Follow @HiiLink",
+    description: "Follow @HiiLink on X",
     type: "social",
-    reward: 1,
+    reward: 2,
     completed: false,
     verificationUrl: "https://x.com/hiilink",
     platform: "twitter",
   },
   {
-    id: "3",
-    title: "Join Discord Server",
-    description: "Join the official HiiLink Discord community",
+    id: "2",
+    title: "Follow @hiisverHQ",
+    description: "Follow @hiisverHQ on X",
     type: "social",
-    reward: 1,
+    reward: 2,
     completed: false,
-    verificationUrl: "https://discord.gg/hiilink",
-    platform: "discord",
+    verificationUrl: "https://x.com/hiisverHQ",
+    platform: "twitter",
+  },
+  {
+    id: "3",
+    title: "Follow @themichkhan",
+    description: "Follow @themichkhan on X",
+    type: "social",
+    reward: 2,
+    completed: false,
+    verificationUrl: "https://x.com/themichkhan",
+    platform: "twitter",
   },
   {
     id: "4",
-    title: "Join Telegram Group",
-    description: "Join the HiiLink community on Telegram",
+    title: "Follow @bananatheart",
+    description: "Follow @bananatheart on X",
     type: "social",
-    reward: 1,
+    reward: 2,
     completed: false,
-    verificationUrl: "https://telegram.me/hiilink",
+    verificationUrl: "https://x.com/bananatheart",
+    platform: "twitter",
+  },
+  {
+    id: "5",
+    title: "Follow @LavaMAYC",
+    description: "Follow @LavaMAYC on X",
+    type: "social",
+    reward: 2,
+    completed: false,
+    verificationUrl: "https://x.com/LavaMAYC",
+    platform: "twitter",
+  },
+  {
+    id: "6",
+    title: "Follow @marce_wnl",
+    description: "Follow @marce_wnl on X",
+    type: "social",
+    reward: 2,
+    completed: false,
+    verificationUrl: "https://x.com/marce_wnl",
+    platform: "twitter",
+  },
+  {
+    id: "7",
+    title: "Follow @GoblinMemeBNB",
+    description: "Follow @GoblinMemeBNB on X",
+    type: "social",
+    reward: 2,
+    completed: false,
+    verificationUrl: "https://x.com/GoblinMemeBNB",
+    platform: "twitter",
+  },
+
+  // Twitter Retweets
+  {
+    id: "8",
+    title: "Retweet @hiisverHQ",
+    description: "Retweet this post by @hiisverHQ",
+    type: "social",
+    reward: 2,
+    completed: false,
+    verificationUrl: "https://x.com/hiisverHQ/status/1953447038126854409",
+    platform: "twitter",
+  },
+  {
+    id: "9",
+    title: "Retweet @GoblinMemeBNB",
+    description: "Retweet this post by @GoblinMemeBNB",
+    type: "social",
+    reward: 3,
+    completed: false,
+    verificationUrl: "https://x.com/GoblinMemeBNB/status/1936995627222884490",
+    platform: "twitter",
+  },
+  {
+    id: "10",
+    title: "Retweet @HiiLink",
+    description: "Retweet this post by @HiiLink",
+    type: "social",
+    reward: 3,
+    completed: false,
+    verificationUrl: "https://x.com/hiilink/status/1937795484812501279",
+    platform: "twitter",
+  },
+  {
+    id: "11",
+    title: "Retweet @themichkhan",
+    description: "Retweet this post by @themichkhan",
+    type: "social",
+    reward: 3,
+    completed: false,
+    verificationUrl: "https://x.com/themichkhan/status/1938065716084903980",
+    platform: "twitter",
+  },
+  {
+    id: "12",
+    title: "Retweet @GoblinMemeBNB",
+    description: "Retweet this post by @GoblinMemeBNB",
+    type: "social",
+    reward: 3,
+    completed: false,
+    verificationUrl: "https://x.com/GoblinMemeBNB/status/1951282604617113626",
+    platform: "twitter",
+  },
+  {
+    id: "13",
+    title: "Retweet @HiiLink",
+    description: "Retweet this post by @HiiLink",
+    type: "social",
+    reward: 3,
+    completed: false,
+    verificationUrl: "https://x.com/hiilink/status/1925877017670561869",
+    platform: "twitter",
+  },
+
+  // Twitter Comments
+  {
+    id: "14",
+    title: "Comment on @HiiLink",
+    description: "Comment on this tweet from @HiiLink",
+    type: "social",
+    reward: 4,
+    completed: false,
+    verificationUrl: "https://x.com/hiilink/status/1925877017670561869",
+    platform: "twitter",
+  },
+  {
+    id: "15",
+    title: "Comment on @GoblinMemeBNB",
+    description: "Comment on this tweet from @GoblinMemeBNB",
+    type: "social",
+    reward: 4,
+    completed: false,
+    verificationUrl: "https://x.com/GoblinMemeBNB/status/1953317643156680840",
+    platform: "twitter",
+  },
+  {
+    id: "16",
+    title: "Comment on @hiisverHQ",
+    description: "Comment on this tweet from @hiisverHQ",
+    type: "social",
+    reward: 4,
+    completed: false,
+    verificationUrl: "https://x.com/hiisverHQ/status/1953456095181050001",
+    platform: "twitter",
+  },
+  {
+    id: "17",
+    title: "Comment on @GoblinMemeBNB",
+    description: "Comment on this tweet from @GoblinMemeBNB",
+    type: "social",
+    reward: 4,
+    completed: false,
+    verificationUrl: "https://x.com/GoblinMemeBNB/status/1936995627222884490",
+    platform: "twitter",
+  },
+
+  // Telegram Joins
+  {
+    id: "18",
+    title: "Join GoblinMemeBNB Telegram",
+    description: "Join the GoblinMemeBNB Telegram group",
+    type: "social",
+    reward: 5,
+    completed: false,
+    verificationUrl: "https://t.me/GoblinMemeBNB",
     platform: "telegram",
+  },
+  {
+    id: "19",
+    title: "Join HiiLink Telegram",
+    description: "Join the HiiLink Telegram group",
+    type: "social",
+    reward: 5,
+    completed: false,
+    verificationUrl: "https://t.me/hiilinkHQ",
+    platform: "telegram",
+  },
+
+  // Discord Join
+  {
+    id: "20",
+    title: "Join Discord Server",
+    description: "Join the official Discord server",
+    type: "social",
+    reward: 5,
+    completed: false,
+    verificationUrl: "https://discord.gg/vPPy4SQ2Rt",
+    platform: "discord",
   },
 ];
 
@@ -101,15 +280,20 @@ export function TaskList({
   const tasks: Task[] = useMemo(() => {
     return initialTasks.map((task) => ({
       ...task,
-      completed: socials.some((s) => s.platform === task.platform),
+      completed: socials.some((s) => s.id.toString() === task.id),
     }));
   }, [socials]);
 
   const handleSocial = async (
     platform: string,
-    handle: string
+    handle: string,
+    id: string
   ): Promise<string> => {
-    const { data } = await post_request("/user/socials", { platform, handle });
+    const { data } = await post_request("/user/socials", {
+      platform,
+      handle,
+      social_task_id: id,
+    });
     return data?.message || "Social task verified";
   };
 
@@ -121,14 +305,18 @@ export function TaskList({
     };
   };
 
-  const handleTaskVerification = async (task: Task, username: string) => {
+  const handleTaskVerification = async (
+    task: Task,
+    username: string,
+    id?: string
+  ) => {
     if (!userAddress) return;
 
     setLoading(task.id);
 
     try {
       if (task.type === "social" && task.platform) {
-        await handleSocial(task.platform, username);
+        await handleSocial(task.platform, username, id ?? "1");
         toast.success(`Social task verified 🎉`, {
           icon: <Key className="h-4 w-4" />,
         });
@@ -173,7 +361,21 @@ export function TaskList({
 
     switch (task.type) {
       case "nft":
-        return <Heart className="h-5 w-5 text-pink-500" />;
+        return (
+          <div className="w-5 h-5 relative">
+            <video
+              width="28"
+              height="28"
+              loop
+              autoPlay
+              muted
+              className="w-8 h-8 absolute top-0 left-0 object-cover"
+            >
+              <source src="/ApeCoin.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        );
       case "onchain":
         return <MessageCircle className="h-5 w-5 text-orange-500" />;
       default:
@@ -299,7 +501,8 @@ export function TaskList({
           onVerify={async (username) => {
             await handleTaskVerification(
               tasks.find((t) => t.id === selectedTask.id)!,
-              username!
+              username!,
+              selectedTask.id
             );
             setSocialDialogOpen(false);
           }}

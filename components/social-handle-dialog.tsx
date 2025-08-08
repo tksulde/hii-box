@@ -41,7 +41,7 @@ export function SocialTaskDialog({ open, onClose, onVerify, task }: Props) {
 
   const handleVisit = () => {
     window.open(task.url, "_blank");
-    setVisited(true);
+    setTimeout(() => setVisited(true), 2000);
   };
 
   const handleDone = async () => {
