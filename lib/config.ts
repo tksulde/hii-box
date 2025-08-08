@@ -1,5 +1,5 @@
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { curtis } from "@reown/appkit/networks";
+import { apeChain } from "@reown/appkit/networks";
 import { getCsrfToken, getSession, signIn, signOut } from "next-auth/react";
 
 import {
@@ -17,7 +17,7 @@ if (!projectId) {
   throw new Error("Project ID is not defined");
 }
 
-export const networks = [curtis] as [AppKitNetwork, ...AppKitNetwork[]];
+export const networks = [apeChain] as [AppKitNetwork, ...AppKitNetwork[]];
 
 //Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
@@ -30,7 +30,7 @@ export const siweConfig = createSIWEConfig({
   getMessageParams: async () => ({
     domain: typeof window !== "undefined" ? window.location.host : "",
     uri: typeof window !== "undefined" ? window.location.origin : "",
-    chains: [curtis.id],
+    chains: [apeChain.id],
     statement: "Please sign with your account",
   }),
   createMessage: ({ address, ...args }: SIWECreateMessageArgs) =>
