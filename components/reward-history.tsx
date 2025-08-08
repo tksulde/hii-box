@@ -230,7 +230,9 @@ export function RewardHistory({ myBoxes }: RewardHistoryProps) {
                     </div>
                     <div className="text-right space-y-1">
                       {reward.amount && (
-                        <p className="text-lg font-bold">{reward.amount} APE</p>
+                        <p className="text-lg font-bold">
+                          {reward.amount} {reward.type}
+                        </p>
                       )}
                       {reward.txHash && (
                         <a
