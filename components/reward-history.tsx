@@ -134,6 +134,11 @@ export function RewardHistory({ myBoxes }: RewardHistoryProps) {
     .filter((r) => r.type === "points")
     .reduce((sum, r) => sum + (r.amount ?? 0), 0);
 
+  const compact = new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    compactDisplay: "short",
+  }).format(totalPoints);
+
   if (loading) {
     return (
       <Card className="card-shadow border-border/50">
@@ -179,8 +184,7 @@ export function RewardHistory({ myBoxes }: RewardHistoryProps) {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              {" "}
-              {totalPoints.toLocaleString()} pts
+              {compact.toLocaleString()} pts
             </div>
           </CardContent>
         </Card>
@@ -231,7 +235,7 @@ export function RewardHistory({ myBoxes }: RewardHistoryProps) {
                     <div className="text-right space-y-1">
                       {reward.amount && (
                         <p className="text-lg font-bold">
-                          {reward.amount} {reward.type}
+                          {reward.amount.toLocaleString()} {reward.type}
                         </p>
                       )}
                       {reward.txHash && (

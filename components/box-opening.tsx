@@ -54,7 +54,7 @@ export function BoxOpening({
     },
     {
       type: "ape",
-      name: "1 APE",
+      name: "APE",
       amount: 50,
       rarity: "rare",
       weight: 4000,
