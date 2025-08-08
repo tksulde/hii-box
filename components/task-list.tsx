@@ -42,7 +42,7 @@ interface Task {
 interface TaskListProps {
   userAddress?: string;
   onTaskComplete: () => void;
-  socials: { platform: string; id: number }[];
+  socials: { platform: string; social_task_id: number }[];
   isSocialLoading: boolean;
 }
 
@@ -280,7 +280,7 @@ export function TaskList({
   const tasks: Task[] = useMemo(() => {
     return initialTasks.map((task) => ({
       ...task,
-      completed: socials.some((s) => s.id.toString() === task.id),
+      completed: socials.some((s) => s.social_task_id.toString() === task.id),
     }));
   }, [socials]);
 
@@ -288,13 +288,13 @@ export function TaskList({
     platform: string,
     handle: string,
     id: string
-  ): Promise<string> => {
+  ): Promise<any> => {
     const { data } = await post_request("/user/socials", {
       platform,
       handle,
       social_task_id: id,
     });
-    return data?.message || "Social task verified";
+    return { message: data.message || "Social task verified" };
   };
 
   const checkNFT = async (): Promise<any> => {
@@ -311,13 +311,15 @@ export function TaskList({
     id?: string
   ) => {
     if (!userAddress) return;
-
     setLoading(task.id);
-
     try {
       if (task.type === "social" && task.platform) {
-        await handleSocial(task.platform, username, id ?? "1");
-        toast.success(`Social task verified 🎉`, {
+        const { message } = await handleSocial(
+          task.platform,
+          username,
+          id ?? ""
+        );
+        toast.success(`${message} 🎉`, {
           icon: <Key className="h-4 w-4" />,
         });
         onTaskComplete();
