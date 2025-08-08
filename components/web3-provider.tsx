@@ -14,8 +14,8 @@ const queryClient = new QueryClient();
 const metadata = {
   name: "Hii Box Opening",
   description: "Hii Box Opening",
-  url: "https://hii-box.vercel.app",
-  icons: ["https://hii-box.vercel.app/favicon.ico"],
+  url: "https://box.hii.link",
+  icons: ["https://box.hii.link/favicon.ico"],
 };
 
 // Create the modal
