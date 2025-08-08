@@ -28,7 +28,7 @@ interface UserStats {
 }
 
 interface Social {
-  id: number;
+  social_task_id: number;
   platform: string;
   created_at: string;
 }
